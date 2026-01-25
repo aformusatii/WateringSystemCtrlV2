@@ -9,11 +9,11 @@
 class ServerHelper {
 
 	private:
-		char* title;
+		const char* title;
 		ESP8266WebServer* server;
 
 	public:
-		ServerHelper(char *, ESP8266WebServer*);
+		ServerHelper(const char*, ESP8266WebServer*);
 
 		void indexPage();
 		void handleNotFound();

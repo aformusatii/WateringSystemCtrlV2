@@ -1,5 +1,6 @@
 // Do not remove the include below
 #include "ESP8266WateringSystemCtrlV1.h"
+#include <LittleFS.h>
 
 WiFiHelper wiFiHelper;
 ESP8266WebServer server(80);
@@ -38,9 +39,9 @@ void setup()
 
 	delay(100);
 
-	// Initialize SPIFFS
-	if (!SPIFFS.begin()) {
-		Serial.println("Failed to mount SPIFFS");
+	// Initialize LittleFS
+	if (!LittleFS.begin()) {
+		Serial.println("Failed to mount LittleFS");
 		return;
 	}
 
@@ -72,15 +73,15 @@ void handleNotFound() {
 }
 
 void setPortState() {
-	StaticJsonDocument<500> request;
+	JsonDocument request;
     deserializeJson(request, server.arg("plain"));
 
     for (uint8_t i = PIN_MIN; i <= PIN_MAX; i++) {
     	char pinKey[6];
     	sprintf(pinKey, "p%d", i);
 
-        if (request.containsKey(pinKey)) {
-        	bool channelValue = request[pinKey];
+        if (request[pinKey].is<bool>()) {
+        	bool channelValue = request[pinKey].as<bool>();
 
         	PCF.write(i, channelValue ? HIGH : LOW);
         }
@@ -90,7 +91,7 @@ void setPortState() {
 }
 
 void getPortState() {
-	StaticJsonDocument<500> rootDoc;
+	JsonDocument rootDoc;
 
 	int portState = PCF.read16();
 
@@ -104,7 +105,7 @@ void getPortState() {
 }
 
 void getTime() {
-	StaticJsonDocument<512> rootDoc;
+	JsonDocument rootDoc;
 
 	bool h12, PM_time, century;
 
@@ -121,7 +122,7 @@ void getTime() {
 }
 
 void setTime() {
-	StaticJsonDocument<500> request;
+	JsonDocument request;
     deserializeJson(request, server.arg("plain"));
 
     byte year = (byte) request["year"];
@@ -152,7 +153,7 @@ void setTime() {
 }
 
 void getChannels() {
-	StaticJsonDocument<1024> responseJson;
+	JsonDocument responseJson;
 	JsonArray responseJsonArray = responseJson.to<JsonArray>();
 	WaterCtrl.channelsWriteToJson(responseJsonArray);
 
@@ -160,7 +161,7 @@ void getChannels() {
 }
 
 void setChannels() {
-	StaticJsonDocument<1024> requestJson;
+	JsonDocument requestJson; 
     deserializeJson(requestJson, server.arg("plain"));
     WaterCtrl.channelsReadFromJson(requestJson.as<JsonArray>());
     WaterCtrl.saveChannelsToFile();
@@ -169,7 +170,7 @@ void setChannels() {
     writeJson(200, requestJson);
 }
 
-// ============================================== SPIFFS Handlers ==============================================
+// ============================================== LittleFS Handlers ==============================================
 void handleFileUpload() {
 	HTTPUpload &upload = server.upload();
 
@@ -181,7 +182,7 @@ void handleFileUpload() {
 		Serial.print("Upload Start: ");
 		Serial.println(filename);
 
-		fsUploadFile = SPIFFS.open(filename, "w");
+		fsUploadFile = LittleFS.open(filename, "w");
 	} else if (upload.status == UPLOAD_FILE_WRITE) {
 		// Write the bytes to the file
 		if (fsUploadFile) {
@@ -206,7 +207,7 @@ void handleFileUpload() {
 		// Abort
 		if (fsUploadFile) {
 			fsUploadFile.close();
-			SPIFFS.remove(upload.filename);
+			LittleFS.remove(upload.filename);
 		}
 
 		Serial.println("Upload Aborted");
@@ -221,19 +222,19 @@ void handleFileDelete() {
 	}
 
 	String filename = server.arg("filename");
-	// SPIFFS expects filenames to start with '/'
+	// LittleFS expects filenames to start with '/'
 	if (!filename.startsWith("/")) {
 		filename = "/" + filename;
 	}
 
 	// Check if file exists
-	if (!SPIFFS.exists(filename)) {
+	if (!LittleFS.exists(filename)) {
 		server.send(404, "text/plain", "File Not Found");
 		return;
 	}
 
 	// Try deleting
-	if (SPIFFS.remove(filename)) {
+	if (LittleFS.remove(filename)) {
 		server.send(200, "text/plain", "File deleted successfully");
 	} else {
 		server.send(500, "text/plain", "File deletion failed");
@@ -242,14 +243,14 @@ void handleFileDelete() {
 
 void handleFilesRead() {
 	// Estimate capacity for up to 20 files; adjust if needed!
-	StaticJsonDocument<2048> doc;
+	JsonDocument doc;
 
-	JsonArray files = doc.createNestedArray("files");
+	JsonArray files = doc["files"].to<JsonArray>();
 
-	Dir dir = SPIFFS.openDir("/");
+	Dir dir = LittleFS.openDir("/");
 
 	while (dir.next()) {
-		JsonObject file = files.createNestedObject();
+		JsonObject file = files.add<JsonObject>();
 		file["name"] = dir.fileName();
 		file["size"] = dir.fileSize();
 	}
@@ -281,11 +282,11 @@ bool handleFileRead(String path) {
 
 	String fullPath = filename;
 
-	if (!SPIFFS.exists(fullPath)) {
+	if (!LittleFS.exists(fullPath)) {
 		return false;
 	}
 
-	File file = SPIFFS.open(fullPath, "r");
+	File file = LittleFS.open(fullPath, "r");
 	if (!file) {
 		server.send(500, "text/plain", "Failed to open file");
 		return true;
@@ -300,12 +301,12 @@ bool handleFileRead(String path) {
 
 void handleSpiffsInfo() {
   FSInfo fs_info;
-  if (SPIFFS.info(fs_info)) {
+  if (LittleFS.info(fs_info)) {
     size_t total = fs_info.totalBytes;
     size_t used = fs_info.usedBytes;
     size_t free = (total > used) ? (total - used) : 0;
 
-    StaticJsonDocument<200> doc;
+    JsonDocument doc;
     doc["total"] = total;
     doc["used"]  = used;
     doc["free"]  = free;
@@ -314,10 +315,10 @@ void handleSpiffsInfo() {
     serializeJson(doc, response);
     server.send(200, "application/json", response);
   } else {
-    server.send(500, "application/json", "{\"error\":\"SPIFFS.info() failed\"}");
+    server.send(500, "application/json", "{\"error\":\"LittleFS.info() failed\"}");
   }
 }
-// ============================================== End SPIFFS Handlers ==============================================
+// ============================================== End LittleFS Handlers ==============================================
 
 void writeJson(int httpStatus, const JsonDocument &doc) {
 	String output;
@@ -352,7 +353,7 @@ void setupHTTPActions() {
 /* ------------------------------------------------------------------------- */
 
 void setupAfterWiFiConnected() {
-	StaticJsonDocument<256> rootDoc;
+	JsonDocument rootDoc;
 	//rootDoc["IP"] = WiFi.localIP();
 	logger.info(rootDoc, "Connected to WiFi");
 

@@ -1,0 +1,303 @@
+C:\Users\Defendor\.platformio\penv\Scripts\platformio.exe run --environment d1_mini_pro 
+
+Processing d1_mini_pro (platform: espressif8266; board: d1_mini_pro; framework: arduino)
+---------------------------------------------------------------------------------------------------------------------Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif8266/d1_mini_pro.html
+PLATFORM: Espressif 8266 (4.2.1) > WeMos D1 mini Pro  
+HARDWARE: ESP8266 80MHz, 80KB RAM, 16MB Flash
+PACKAGES:
+ - framework-arduinoespressif8266 @ 3.30102.0 (3.1.2) 
+ - tool-esptool @ 1.413.0 (4.13)
+ - tool-esptoolpy @ 1.30000.201119 (3.0.0)
+ - toolchain-xtensa @ 2.100300.220621 (10.3.0)        
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 41 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- ArduinoJson @ 7.4.2
+|-- DS3231 @ 1.2.0     
+|-- PCF8575 @ 0.2.5    
+|-- afutils
+Building in release mode
+Compiling .pio\build\d1_mini_pro\src\ESP8266WateringSystemCtrlV1.cpp.o
+src\ESP8266WateringSystemCtrlV1.cpp:7:27: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+    7 | ServerHelper serverHelper("WateringSystemCtrlV1", &server);
+      |                           ^~~~~~~~~~~~~~~~~~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp: In function 'void setup()':
+src\ESP8266WateringSystemCtrlV1.cpp:42:7: warning: 'SPIFFS' is deprecated: SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems. [-Wdeprecated-declarations]
+   42 |  if (!SPIFFS.begin()) {
+      |       ^~~~~~
+In file included from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/CertStoreBearSSL.h:26,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecureBearSSL.h:30,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecure.h:23,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiServerSecure.h:20,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/ESP8266WiFi.h:41,
+                 from lib\afutils/WiFiHelper.h:8,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\cores\esp8266/FS.h:286:15: note: declared here 
+  286 | extern fs::FS SPIFFS __attribute__((deprecated("SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems.")));
+      |               ^~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp: In function 'void setPortState()':
+src\ESP8266WateringSystemCtrlV1.cpp:75:2: warning: 'template<unsigned int N> class ArduinoJson::V742PB22::StaticJsonDocument' is deprecated: use JsonDocument instead [-Wdeprecated-declarations]
+   75 |  StaticJsonDocument<500> request;
+      |  ^~~~~~~~~~~~~~~~~~
+In file included from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.hpp:65,
+                 from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.h:9,
+                 from lib\afutils/WiFiHelper.h:7,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+.pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson/compatibility.hpp:63:58: note: declared here
+   63 | class ARDUINOJSON_DEPRECATED("use JsonDocument instead") StaticJsonDocument
+      |                                                          ^~~~~~~~~~~~~~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp:82:39: warning: 'bool ArduinoJson::V742PB22::JsonDocument::containsKey(TChar*) const [with TChar = char]' is deprecated: use doc["key"].is<T>() instead [-Wdeprecated-declarations]
+   82 |         if (request.containsKey(pinKey)) {
+      |                                       ^
+In file included from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.hpp:42,
+                 from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.h:9,
+                 from lib\afutils/WiFiHelper.h:7,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+.pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson/Document/JsonDocument.hpp:167:8: note: declared here
+  167 |   bool containsKey(TChar* key) const {
+      |        ^~~~~~~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp: In function 'void getPortState()':
+src\ESP8266WateringSystemCtrlV1.cpp:93:2: warning: 'template<unsigned int N> class ArduinoJson::V742PB22::StaticJsonDocument' is deprecated: use JsonDocument instead [-Wdeprecated-declarations]
+   93 |  StaticJsonDocument<500> rootDoc;
+      |  ^~~~~~~~~~~~~~~~~~
+In file included from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.hpp:65,
+                 from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.h:9,
+                 from lib\afutils/WiFiHelper.h:7,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+.pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson/compatibility.hpp:63:58: note: declared here
+   63 | class ARDUINOJSON_DEPRECATED("use JsonDocument instead") StaticJsonDocument
+      |                                                          ^~~~~~~~~~~~~~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp: In function 'void getTime()':
+src\ESP8266WateringSystemCtrlV1.cpp:107:2: warning: 'template<unsigned int N> class ArduinoJson::V742PB22::StaticJsonDocument' is deprecated: use JsonDocument instead [-Wdeprecated-declarations]
+  107 |  StaticJsonDocument<512> rootDoc;
+      |  ^~~~~~~~~~~~~~~~~~
+In file included from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.hpp:65,
+                 from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.h:9,
+                 from lib\afutils/WiFiHelper.h:7,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+.pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson/compatibility.hpp:63:58: note: declared here
+   63 | class ARDUINOJSON_DEPRECATED("use JsonDocument instead") StaticJsonDocument
+      |                                                          ^~~~~~~~~~~~~~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp: In function 'void setTime()':
+src\ESP8266WateringSystemCtrlV1.cpp:124:2: warning: 'template<unsigned int N> class ArduinoJson::V742PB22::StaticJsonDocument' is deprecated: use JsonDocument instead [-Wdeprecated-declarations]
+  124 |  StaticJsonDocument<500> request;
+      |  ^~~~~~~~~~~~~~~~~~
+In file included from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.hpp:65,
+                 from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.h:9,
+                 from lib\afutils/WiFiHelper.h:7,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+.pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson/compatibility.hpp:63:58: note: declared here
+   63 | class ARDUINOJSON_DEPRECATED("use JsonDocument instead") StaticJsonDocument
+      |                                                          ^~~~~~~~~~~~~~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp: In function 'void getChannels()':
+src\ESP8266WateringSystemCtrlV1.cpp:155:2: warning: 'template<unsigned int N> class ArduinoJson::V742PB22::StaticJsonDocument' is deprecated: use JsonDocument instead [-Wdeprecated-declarations]
+  155 |  StaticJsonDocument<1024> responseJson;
+      |  ^~~~~~~~~~~~~~~~~~
+In file included from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.hpp:65,
+                 from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.h:9,
+                 from lib\afutils/WiFiHelper.h:7,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+.pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson/compatibility.hpp:63:58: note: declared here
+   63 | class ARDUINOJSON_DEPRECATED("use JsonDocument instead") StaticJsonDocument
+      |                                                          ^~~~~~~~~~~~~~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp: In function 'void setChannels()':
+src\ESP8266WateringSystemCtrlV1.cpp:163:2: warning: 'template<unsigned int N> class ArduinoJson::V742PB22::StaticJsonDocument' is deprecated: use JsonDocument instead [-Wdeprecated-declarations]
+  163 |  StaticJsonDocument<1024> requestJson;
+      |  ^~~~~~~~~~~~~~~~~~
+In file included from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.hpp:65,
+                 from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.h:9,
+                 from lib\afutils/WiFiHelper.h:7,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+.pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson/compatibility.hpp:63:58: note: declared here
+   63 | class ARDUINOJSON_DEPRECATED("use JsonDocument instead") StaticJsonDocument
+      |                                                          ^~~~~~~~~~~~~~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp: In function 'void handleFileUpload()':
+src\ESP8266WateringSystemCtrlV1.cpp:184:18: warning: 'SPIFFS' is deprecated: SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems. [-Wdeprecated-declarations]
+  184 |   fsUploadFile = SPIFFS.open(filename, "w");
+      |                  ^~~~~~
+In file included from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/CertStoreBearSSL.h:26,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecureBearSSL.h:30,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecure.h:23,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiServerSecure.h:20,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/ESP8266WiFi.h:41,
+                 from lib\afutils/WiFiHelper.h:8,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\cores\esp8266/FS.h:286:15: note: declared here 
+  286 | extern fs::FS SPIFFS __attribute__((deprecated("SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems.")));
+      |               ^~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp:209:4: warning: 'SPIFFS' is deprecated: SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems. [-Wdeprecated-declarations]
+  209 |    SPIFFS.remove(upload.filename);
+      |    ^~~~~~
+In file included from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/CertStoreBearSSL.h:26,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecureBearSSL.h:30,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecure.h:23,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiServerSecure.h:20,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/ESP8266WiFi.h:41,
+                 from lib\afutils/WiFiHelper.h:8,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\cores\esp8266/FS.h:286:15: note: declared here 
+  286 | extern fs::FS SPIFFS __attribute__((deprecated("SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems.")));
+      |               ^~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp: In function 'void handleFileDelete()':
+src\ESP8266WateringSystemCtrlV1.cpp:230:7: warning: 'SPIFFS' is deprecated: SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems. [-Wdeprecated-declarations]
+  230 |  if (!SPIFFS.exists(filename)) {
+      |       ^~~~~~
+In file included from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/CertStoreBearSSL.h:26,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecureBearSSL.h:30,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecure.h:23,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiServerSecure.h:20,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/ESP8266WiFi.h:41,
+                 from lib\afutils/WiFiHelper.h:8,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\cores\esp8266/FS.h:286:15: note: declared here 
+  286 | extern fs::FS SPIFFS __attribute__((deprecated("SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems.")));
+      |               ^~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp:236:6: warning: 'SPIFFS' is deprecated: SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems. [-Wdeprecated-declarations]
+  236 |  if (SPIFFS.remove(filename)) {
+      |      ^~~~~~
+In file included from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/CertStoreBearSSL.h:26,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecureBearSSL.h:30,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecure.h:23,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiServerSecure.h:20,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/ESP8266WiFi.h:41,
+                 from lib\afutils/WiFiHelper.h:8,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\cores\esp8266/FS.h:286:15: note: declared here 
+  286 | extern fs::FS SPIFFS __attribute__((deprecated("SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems.")));
+      |               ^~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp: In function 'void handleFilesRead()':
+src\ESP8266WateringSystemCtrlV1.cpp:245:2: warning: 'template<unsigned int N> class ArduinoJson::V742PB22::StaticJsonDocument' is deprecated: use JsonDocument instead [-Wdeprecated-declarations]
+  245 |  StaticJsonDocument<2048> doc;
+      |  ^~~~~~~~~~~~~~~~~~
+In file included from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.hpp:65,
+                 from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.h:9,
+                 from lib\afutils/WiFiHelper.h:7,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+.pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson/compatibility.hpp:63:58: note: declared here
+   63 | class ARDUINOJSON_DEPRECATED("use JsonDocument instead") StaticJsonDocument
+      |                                                          ^~~~~~~~~~~~~~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp:247:49: warning: 'ArduinoJson::V742PB22::JsonArray ArduinoJson::V742PB22::JsonDocument::createNestedArray(TChar*) [with TChar = const char]' is deprecated: use doc[key].to<JsonArray>() instead [-Wdeprecated-declarations]
+  247 |  JsonArray files = doc.createNestedArray("files");
+      |                                                 ^
+In file included from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.hpp:42,
+                 from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.h:9,
+                 from lib\afutils/WiFiHelper.h:7,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+.pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson/Document/JsonDocument.hpp:356:13: note: declared here
+  356 |   JsonArray createNestedArray(TChar* key) {
+      |             ^~~~~~~~~~~~~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp:249:12: warning: 'SPIFFS' is deprecated: SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems. [-Wdeprecated-declarations]
+  249 |  Dir dir = SPIFFS.openDir("/");
+      |            ^~~~~~
+In file included from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/CertStoreBearSSL.h:26,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecureBearSSL.h:30,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecure.h:23,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiServerSecure.h:20,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/ESP8266WiFi.h:41,
+                 from lib\afutils/WiFiHelper.h:8,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\cores\esp8266/FS.h:286:15: note: declared here 
+  286 | extern fs::FS SPIFFS __attribute__((deprecated("SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems.")));
+      |               ^~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp:252:46: warning: 'ArduinoJson::V742PB22::JsonObject ArduinoJson::V742PB22::JsonArray::createNestedObject() const' is deprecated: use add<JsonObject>() instead [-Wdeprecated-declarations]
+  252 |   JsonObject file = files.createNestedObject();
+      |                                              ^
+In file included from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.hpp:65,
+                 from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.h:9,
+                 from lib\afutils/WiFiHelper.h:7,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+.pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson/compatibility.hpp:140:19: note: declared here
+  140 | inline JsonObject JsonArray::createNestedObject() const {
+      |                   ^~~~~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp: In function 'bool handleFileRead(String)':
+src\ESP8266WateringSystemCtrlV1.cpp:284:7: warning: 'SPIFFS' is deprecated: SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems. [-Wdeprecated-declarations]
+  284 |  if (!SPIFFS.exists(fullPath)) {
+      |       ^~~~~~
+In file included from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/CertStoreBearSSL.h:26,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecureBearSSL.h:30,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecure.h:23,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiServerSecure.h:20,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/ESP8266WiFi.h:41,
+                 from lib\afutils/WiFiHelper.h:8,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\cores\esp8266/FS.h:286:15: note: declared here 
+  286 | extern fs::FS SPIFFS __attribute__((deprecated("SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems.")));
+      |               ^~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp:288:14: warning: 'SPIFFS' is deprecated: SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems. [-Wdeprecated-declarations]
+  288 |  File file = SPIFFS.open(fullPath, "r");
+      |              ^~~~~~
+In file included from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/CertStoreBearSSL.h:26,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecureBearSSL.h:30,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecure.h:23,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiServerSecure.h:20,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/ESP8266WiFi.h:41,
+                 from lib\afutils/WiFiHelper.h:8,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\cores\esp8266/FS.h:286:15: note: declared here 
+  286 | extern fs::FS SPIFFS __attribute__((deprecated("SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems.")));
+      |               ^~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp: In function 'void handleSpiffsInfo()':
+src\ESP8266WateringSystemCtrlV1.cpp:303:7: warning: 'SPIFFS' is deprecated: SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems. [-Wdeprecated-declarations]
+  303 |   if (SPIFFS.info(fs_info)) {
+      |       ^~~~~~
+In file included from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/CertStoreBearSSL.h:26,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecureBearSSL.h:30,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiClientSecure.h:23,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/WiFiServerSecure.h:20,
+                 from C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\libraries\ESP8266WiFi\src/ESP8266WiFi.h:41,
+                 from lib\afutils/WiFiHelper.h:8,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+C:\Users\Defendor\.platformio\packages\framework-arduinoespressif8266\cores\esp8266/FS.h:286:15: note: declared here 
+  286 | extern fs::FS SPIFFS __attribute__((deprecated("SPIFFS has been deprecated. Please consider moving to LittleFS or other filesystems.")));
+      |               ^~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp:308:5: warning: 'template<unsigned int N> class ArduinoJson::V742PB22::StaticJsonDocument' is deprecated: use JsonDocument instead [-Wdeprecated-declarations]
+  308 |     StaticJsonDocument<200> doc;
+      |     ^~~~~~~~~~~~~~~~~~
+In file included from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.hpp:65,
+                 from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.h:9,
+                 from lib\afutils/WiFiHelper.h:7,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+.pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson/compatibility.hpp:63:58: note: declared here
+   63 | class ARDUINOJSON_DEPRECATED("use JsonDocument instead") StaticJsonDocument
+      |                                                          ^~~~~~~~~~~~~~~~~~
+src\ESP8266WateringSystemCtrlV1.cpp: In function 'void setupAfterWiFiConnected()':
+src\ESP8266WateringSystemCtrlV1.cpp:355:2: warning: 'template<unsigned int N> class ArduinoJson::V742PB22::StaticJsonDocument' is deprecated: use JsonDocument instead [-Wdeprecated-declarations]
+  355 |  StaticJsonDocument<256> rootDoc;
+      |  ^~~~~~~~~~~~~~~~~~
+In file included from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.hpp:65,
+                 from .pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson.h:9,
+                 from lib\afutils/WiFiHelper.h:7,
+                 from src\ESP8266WateringSystemCtrlV1.h:11,
+                 from src\ESP8266WateringSystemCtrlV1.cpp:2:
+.pio\libdeps\d1_mini_pro\ArduinoJson\src/ArduinoJson/compatibility.hpp:63:58: note: declared here
+   63 | class ARDUINOJSON_DEPRECATED("use JsonDocument instead") StaticJsonDocument
+      |                                                          ^~~~~~~~~~~~~~~~~~
+Retrieving maximum program size .pio\build\d1_mini_pro\firmware.elf
+Checking size .pio\build\d1_mini_pro\firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [====      ]  37.8% (used 30972 bytes from 81920 bytes)
+Flash: [====      ]  37.0% (used 385999 bytes from 1044464 bytes)
+============================================ [SUCCESS] Took 8.96 seconds ============================================ *  Terminal will be reused by tasks, press any key to close it. 

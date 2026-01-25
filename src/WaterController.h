@@ -4,9 +4,7 @@
 #include <PCF8575.h>
 #include <ArduinoJson.h>
 #include <FS.h>
-
-// Adjust for ESP32:
-// #include <LittleFS.h> // and use LittleFS instead of SPIFFS
+#include <LittleFS.h>
 
 struct RTCTimeStruct {
     uint8_t hour;

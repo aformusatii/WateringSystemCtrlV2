@@ -1,7 +1,7 @@
 #include "WaterController.h"
 
 WaterController::WaterController(PCF8575* pcf, uint8_t channelPinBase)
-    : _pcf(pcf), _channelPinBase(channelPinBase), pcfValues(0)
+    : _pcf(pcf), pcfValues(0), _channelPinBase(channelPinBase)
 {
 }
 
@@ -193,11 +193,11 @@ void WaterController::channelsReadFromJson(const JsonArray& arr)
     for (JsonObject obj : arr) {
         if (ch >= MAX_CHANNELS) break;
 
-        if (obj.containsKey("name")) {
+        if (obj["name"].is<const char*>()) {
         	channels[ch].name = (String) obj["name"];
         }
 
-        if (obj.containsKey("mode")) {
+        if (obj["mode"].is<uint8_t>()) {
         	channels[ch].mode = obj["mode"];
 
         	switch (channels[ch].mode) {
@@ -211,14 +211,17 @@ void WaterController::channelsReadFromJson(const JsonArray& arr)
         	}
         }
 
-        if (obj.containsKey("schedules")) {
+        JsonArray schedules = obj["schedules"].as<JsonArray>();
+        if (!schedules.isNull()) {
         	uint8_t timeSlotIndex = 0;
-        	JsonArray schedules = (JsonArray) obj["schedules"];
 
         	for (JsonObject schedule : schedules) {
-        		if (schedule.containsKey("startHour")
-        				&& schedule.containsKey("startMinute")
-						&& schedule.containsKey("durationMin")) {
+        		if (timeSlotIndex >= MAX_TIME_SLOTS) {
+        			break;
+        		}
+        		if (schedule["startHour"].is<uint8_t>()
+        				&& schedule["startMinute"].is<uint8_t>()
+						&& schedule["durationMin"].is<uint16_t>()) {
             		channels[ch].schedules[timeSlotIndex].startHour = schedule["startHour"];
             		channels[ch].schedules[timeSlotIndex].startMinute = schedule["startMinute"];
             		channels[ch].schedules[timeSlotIndex].durationMin = schedule["durationMin"];
@@ -227,9 +230,9 @@ void WaterController::channelsReadFromJson(const JsonArray& arr)
         	}
         }
 
-        if (obj.containsKey("timer")) {
-        	JsonObject timer = obj["timer"];
-        	if (timer.containsKey("onDurationMs") && timer.containsKey("offDurationMs")) {
+        JsonObject timer = obj["timer"].as<JsonObject>();
+        if (!timer.isNull()) {
+        	if (timer["onDurationMs"].is<unsigned long>() && timer["offDurationMs"].is<unsigned long>()) {
             	channels[ch].timer.onDurationMs = timer["onDurationMs"];
             	channels[ch].timer.offDurationMs = timer["offDurationMs"];
         	}
@@ -243,19 +246,19 @@ void WaterController::channelsReadFromJson(const JsonArray& arr)
 void WaterController::channelsWriteToJson(JsonArray& arr) const
 {
     for (uint8_t ch = 0; ch < MAX_CHANNELS; ++ch) {
-        JsonObject c = arr.createNestedObject();
+        JsonObject c = arr.add<JsonObject>();
         c["name"] = channels[ch].name;
         c["mode"] = channels[ch].mode;
 
-        JsonObject timer = c.createNestedObject("timer");
+        JsonObject timer = c["timer"].to<JsonObject>();
         timer["onDurationMs"] = channels[ch].timer.onDurationMs;
         timer["offDurationMs"] = channels[ch].timer.offDurationMs;
 
-        JsonArray schedules = c.createNestedArray("schedules");
+        JsonArray schedules = c["schedules"].to<JsonArray>();
 		for (uint8_t timeSlotIndex = 0; timeSlotIndex < MAX_TIME_SLOTS; ++timeSlotIndex) {
 			Schedule schedule = channels[ch].schedules[timeSlotIndex];
 
-			JsonObject scheduleJson = schedules.createNestedObject();
+			JsonObject scheduleJson = schedules.add<JsonObject>();
 			scheduleJson["startHour"] = schedule.startHour;
 			scheduleJson["startMinute"] = schedule.startMinute;
 			scheduleJson["durationMin"] = schedule.durationMin;
@@ -263,18 +266,18 @@ void WaterController::channelsWriteToJson(JsonArray& arr) const
     }
 }
 
-// ==== PERSISTENCE ON SPIFFS ====
+// ==== PERSISTENCE ON LittleFS ====
 
 // Load from JSON file
 bool WaterController::loadFromFile(const char* path, const uint8_t configType) {
-    File file = SPIFFS.open(path, "r");
+    File file = LittleFS.open(path, "r");
 
     if (!file || file.size() == 0) {
         if (file) file.close();
         return false;
     }
 
-    StaticJsonDocument<2048> doc;
+    JsonDocument doc;
     DeserializationError err = deserializeJson(doc, file);
     file.close();
     if (err) return false;
@@ -292,7 +295,7 @@ bool WaterController::loadFromFile(const char* path, const uint8_t configType) {
 
 // Save to JSON file
 bool WaterController::saveToFile(const char* path, const uint8_t configType) {
-    StaticJsonDocument<2048> doc;
+    JsonDocument doc;
     JsonArray arr = doc.to<JsonArray>();
 
     switch (configType) {
@@ -302,7 +305,7 @@ bool WaterController::saveToFile(const char* path, const uint8_t configType) {
     }
 
 
-    File f = SPIFFS.open(path, "w");
+    File f = LittleFS.open(path, "w");
     if (!f) return false;
 
     bool ok = (serializeJson(doc, f) > 0);

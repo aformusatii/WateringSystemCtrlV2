@@ -1,6 +1,6 @@
 #include "ServerHelper.h"
 
-ServerHelper::ServerHelper(char *_title, ESP8266WebServer *_server) {
+ServerHelper::ServerHelper(const char* _title, ESP8266WebServer *_server) {
 	title = _title;
 	server = _server;
 }

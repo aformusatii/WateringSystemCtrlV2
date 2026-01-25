@@ -11,7 +11,7 @@
 WiFiUDP UDP;
 
 void Logger::info(const char *msg) {
-	StaticJsonDocument<256> doc;
+	JsonDocument doc;
 	send(doc, LEVEL_INFO, msg);
 }
 
@@ -20,7 +20,7 @@ void Logger::info(JsonDocument &doc, const char *msg) {
 }
 
 void Logger::error(const char *msg) {
-	StaticJsonDocument<256> doc;
+	JsonDocument doc;
 	send(doc, LEVEL_ERROR, msg);
 }
 
