@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dynamic Channel Controls</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .channel-panel {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #eee;
+        }
+
+        .channel-header {
+            display: flex;
+            align-items: center;
+        }
+
+        .channel-header .channel-label {
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            background: #f0f0f0;
+            margin-right: 5px;
+        }
+
+        .channel-header .channel-name-input {
+            flex: 1;
+            padding: 5px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            margin-right: 5px;
+        }
+
+        .mode-selector {
+            margin-top: 10px;
+            display: flex;
+        }
+
+        .mode-button {
+            border: 1px solid #ccc;
+            background: #fff;
+            padding: 5px 10px;
+            margin-right: -1px;
+            cursor: pointer;
+        }
+
+        .mode-button.active {
+            background: #d0e7ff;
+        }
+
+        .timer-settings,
+        .scheduler-settings {
+            margin-top: 10px;
+        }
+
+        .timer-settings label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .timer-settings input {
+            margin-left: 5px;
+        }
+
+        .scheduler-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .scheduler-row .slot-label {
+            margin-right: 10px;
+        }
+
+        .scheduler-row label {
+            margin-right: 10px;
+            font-size: 0.9em;
+        }
+
+        .scheduler-row input {
+            width: 70px;
+            margin-right: 10px;
+        }
+
+        .scheduler-settings input[readonly] {
+            background: #eee;
+            border: 1px solid #ccc;
+        }
+
+        .footer-buttons {
+            text-align: right;
+        }
+
+        .footer-buttons button {
+            margin-left: 10px;
+            padding: 5px 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="channels-container"></div>
+
+    <div class="footer-buttons">
+        <button id="save-button" onClick="saveChannelsData();">Save</button>
+    </div>
+
+    <div class="section">
+        <h2>DS3231</h2>
+        <div id="DS3231-container">Loading...</div>
+        <button type="button" class="btn fr" onClick="refreshDS3231();">Refresh</button>
+        <button type="button" class="btn fr mr-5" onClick="updateDS3231();">Update Time</button>
+        <div class="clrfix"></div>
+    </div>
+
+    <script>
+        // Mode mapping: 1=Off, 2=Manual, 3=Timer, 4=Scheduler
+        const modes = [
+            { key: 4, name: 'Off' },
+            { key: 3, name: 'Manual' },
+            { key: 2, name: 'Timer' },
+            { key: 1, name: 'Scheduler' }
+        ];
+
+        const modeMap = modes.reduce((acc, mode) => {
+            acc[mode.key] = mode.name.toLowerCase();
+            return acc;
+        }, {});
+
+        let channels = [];
+        let ds3231Data = {};
+
+        async function buildChannels() {
+            const container = document.getElementById('channels-container');
+
+            channels.forEach((chData, index) => {
+                const chIndex = index + 1;
+                const panel = document.createElement('div');
+                panel.className = 'channel-panel';
+                panel.id = `channel-${chIndex}`;
+
+                // Header with editable channel name
+                const header = document.createElement('div');
+                header.className = 'channel-header';
+
+                const label = document.createElement('span');
+                label.className = 'channel-label';
+                label.textContent = `CH ${chIndex}`;
+                header.appendChild(label);
+
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'channel-name-input';
+                nameInput.id = `channel${chIndex}-name`;
+                nameInput.value = chData.name;
+                nameInput.dataset.channel = chIndex;
+                nameInput.addEventListener('change', (e) => {
+                    const channelIndex = e.target.dataset.channel - 1;
+                    channels[channelIndex].name = e.target.value;
+                });
+                header.appendChild(nameInput);
+
+                panel.appendChild(header);
+
+                // Mode buttons
+                const modeDiv = document.createElement('div');
+                modeDiv.className = 'mode-selector';
+                modes.forEach((modeObj, idx) => {
+                    const btn = document.createElement('button');
+                    btn.textContent = modeObj.name;
+                    btn.className = 'mode-button';
+                    btn.dataset.channel = chIndex;
+                    btn.dataset.mode = modeObj.key;
+                    if (chData.mode === modeObj.key) btn.classList.add('active');
+                    modeDiv.appendChild(btn);
+                });
+                panel.appendChild(modeDiv);
+
+                // Timer settings
+                const timerDiv = document.createElement('div');
+                timerDiv.className = 'timer-settings';
+                timerDiv.id = `channel${chIndex}-timer`;
+                if (modeMap[chData.mode] !== 'timer') timerDiv.style.display = 'none';
+
+                ['onDurationMs', 'offDurationMs'].forEach(key => {
+                    const label = document.createElement('label');
+                    label.textContent = key === 'onDurationMs' ? 'On Period (ms):' : 'Off Period (ms):';
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.min = '0';
+                    input.id = `channel${chIndex}-${key}`;
+                    input.value = chData.timer[key];
+                    input.dataset.channel = chIndex;
+                    input.addEventListener('change', (e) => {
+                        const channelIndex = e.target.dataset.channel - 1;
+                        channels[channelIndex].timer[key] = parseInt(e.target.value);
+                    });
+                    label.appendChild(input);
+                    timerDiv.appendChild(label);
+                });
+                panel.appendChild(timerDiv);
+
+                // Scheduler settings
+                const schedDiv = document.createElement('div');
+                schedDiv.className = 'scheduler-settings';
+                schedDiv.id = `channel${chIndex}-scheduler`;
+                if (modeMap[chData.mode] !== 'scheduler') schedDiv.style.display = 'none';
+
+                chData.schedules.forEach((slotData, slotIdx) => {
+                    const row = document.createElement('div');
+                    row.className = 'scheduler-row';
+
+                    const slotLabel = document.createElement('label');
+                    slotLabel.className = 'slot-label';
+                    slotLabel.textContent = `Slot ${slotIdx + 1}:`;
+                    row.appendChild(slotLabel);
+
+                    const startLbl = document.createElement('label');
+                    startLbl.textContent = 'Start Time';
+                    const startInput = document.createElement('input');
+                    startInput.type = 'time';
+                    startInput.id = `channel${chIndex}-slot${slotIdx + 1}-start`;
+                    startInput.value = `${String(slotData.startHour).padStart(2, '0')}:${String(slotData.startMinute).padStart(2, '0')}`;
+                    startInput.dataset.channel = chIndex;
+                    startInput.addEventListener('change', (e) => {
+                        const channelIndex = e.target.dataset.channel - 1;
+                        const [hh, mm] = e.target.value.split(':').map(Number);
+                        channels[channelIndex].schedules[slotIdx].startHour = hh;
+                        channels[channelIndex].schedules[slotIdx].startMinute = mm;
+                    });
+                    startLbl.appendChild(startInput);
+                    row.appendChild(startLbl);
+
+                    const durLbl = document.createElement('label');
+                    durLbl.textContent = 'Duration (min)';
+                    const durInput = document.createElement('input');
+                    durInput.type = 'number';
+                    durInput.min = '0';
+                    durInput.id = `channel${chIndex}-slot${slotIdx + 1}-duration`;
+                    durInput.value = slotData.durationMin;
+                    durInput.dataset.channel = chIndex;
+                    durInput.addEventListener('change', (e) => {
+                        const channelIndex = e.target.dataset.channel - 1;
+                        channels[channelIndex].schedules[slotIdx].durationMin = parseInt(e.target.value);
+                    });
+                    durLbl.appendChild(durInput);
+                    row.appendChild(durLbl);
+
+                    const endLbl = document.createElement('label');
+                    endLbl.textContent = 'End Time';
+                    const endInput = document.createElement('input');
+                    endInput.type = 'time';
+                    endInput.readOnly = true;
+                    endInput.id = `channel${chIndex}-slot${slotIdx + 1}-end`;
+                    endLbl.appendChild(endInput);
+                    row.appendChild(endLbl);
+
+                    schedDiv.appendChild(row);
+                });
+                panel.appendChild(schedDiv);
+
+                container.appendChild(panel);
+            });
+
+            // Listeners for mode toggle
+            document.querySelectorAll('.mode-button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const ch = btn.dataset.channel;
+                    const mode = btn.dataset.mode;
+
+                    const channelIndex = e.target.dataset.channel - 1;
+                    channels[channelIndex].mode = parseInt(e.target.dataset.mode);
+
+                    document.querySelectorAll(`#channel-${ch} .mode-button.active`).forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    document.getElementById(`channel${ch}-timer`).style.display = (modeMap[mode] === 'timer') ? 'block' : 'none';
+                    document.getElementById(`channel${ch}-scheduler`).style.display = (modeMap[mode] === 'scheduler') ? 'block' : 'none';
+                });
+            });
+
+            // Compute end times
+            const computeEnd = (startVal, durVal) => {
+                const [h, m] = startVal.split(':').map(Number);
+                const total = h * 60 + m + parseInt(durVal, 10);
+                const hh = String(Math.floor((total % (24 * 60)) / 60)).padStart(2, '0');
+                const mm = String(total % 60).padStart(2, '0');
+                return `${hh}:${mm}`;
+            };
+
+            channels.forEach((_, idx) => {
+                const chIndex = idx + 1;
+                channels[idx].schedules.forEach((_, slotIdx) => {
+                    const sInput = document.getElementById(`channel${chIndex}-slot${slotIdx + 1}-start`);
+                    const dInput = document.getElementById(`channel${chIndex}-slot${slotIdx + 1}-duration`);
+                    const eInput = document.getElementById(`channel${chIndex}-slot${slotIdx + 1}-end`);
+                    const update = () => eInput.value = computeEnd(sInput.value, dInput.value);
+                    sInput.addEventListener('input', update);
+                    dInput.addEventListener('input', update);
+                    update();
+                });
+            });
+        };
+
+        function pad(n) { return n < 10 ? "0" + n : n; }
+
+        async function refreshDS3231() {
+            await fetchDS3231Data();
+            buildDS3231();
+        }
+
+        function buildDS3231() {
+            const container = document.getElementById('DS3231-container');
+            container.innerHTML = '';   
+            const currentTime = `${pad(ds3231Data.hour)}:${pad(ds3231Data.minute)}:${pad(ds3231Data.second)} ${pad(ds3231Data.day)}/${pad(ds3231Data.month)}/${ds3231Data.year + 2000}`;
+            const ds3231Div = document.createElement('div');
+            ds3231Div.className = 'ds3231-data';
+            ds3231Div.innerHTML = `
+                <p>Current Time: ${currentTime}</p>
+                <p>Temperature: ${ds3231Data.temperature} °C</p>
+            `;
+            container.appendChild(ds3231Div);
+        }
+
+        async function updateDS3231() {
+            const now = new Date();
+            // extract the current time and date in the format required by DS3231
+            let newDS3231DateTime = {};
+            newDS3231DateTime.hour = now.getHours();
+            newDS3231DateTime.minute = now.getMinutes();
+            newDS3231DateTime.second = now.getSeconds();
+            newDS3231DateTime.year = now.getFullYear() - 2000; // DS3231 uses 2000 as base year
+            newDS3231DateTime.month = now.getMonth() + 1; // JS months are 0-11
+            newDS3231DateTime.day = now.getDate();
+            newDS3231DateTime.second = now.getSeconds();
+
+            const response = await fetch('DS3231.json', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newDS3231DateTime)
+            });
+
+            if (!response.ok) {
+                alert('Error updating DS3231 data: ' + response.statusText);
+                return;
+            }
+
+            const resp = await response.json();
+            alert('DS3231 data updated successfully!');
+        }
+
+        async function fetchDS3231Data() {
+            try {
+                const channelsResponse = await fetch('channels.json');
+                if (!channelsResponse.ok) {
+                alert('Error fetching channels data: ' + channelsResponse.statusText);
+                return;
+                }
+
+                channels = await channelsResponse.json();
+
+                const ds3231Response = await fetch('DS3231.json');
+                if (!ds3231Response.ok) {
+                alert('Error fetching DS3231 data: ' + ds3231Response.statusText);
+                return;
+                }
+
+                ds3231Data = await ds3231Response.json();
+
+            } catch (error) {
+                alert('Error fetching data: ' + error.message);
+                return;
+            }
+        }
+
+        async function fetchChannels() {
+            try {
+                const channelsResponse = await fetch('channels.json');
+                if (!channelsResponse.ok) {
+                alert('Error fetching channels data: ' + channelsResponse.statusText);
+                return;
+                }
+
+                channels = await channelsResponse.json();
+
+                const ds3231Response = await fetch('DS3231.json');
+                if (!ds3231Response.ok) {
+                alert('Error fetching DS3231 data: ' + ds3231Response.statusText);
+                return;
+                }
+
+                ds3231Data = await ds3231Response.json();
+
+            } catch (error) {
+                alert('Error fetching data: ' + error.message);
+                return;
+            }
+        }
+
+        async function saveChannelsData() {
+            console.log("Saving data...", channels);
+
+            const response = await fetch('channels.json', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(channels)
+            });
+
+            if (!response.ok) {
+                alert('Error setting channel: ' + response.statusText);
+                return;
+            }
+        }
+
+        async function onPageLoad() {
+            await fetchChannels();
+            await buildChannels();
+
+            await fetchDS3231Data();
+            buildDS3231();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            onPageLoad()
+        });
+    </script>
+</body>
+
+</html>

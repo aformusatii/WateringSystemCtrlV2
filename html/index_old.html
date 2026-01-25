@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Scheduler</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0 2px;
+      height: 100%;
+    }
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      box-sizing: border-box;
+    }
+    h2 {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    .slot-title {
+      font-size: 1em;
+      font-weight: bold;
+      margin-top: 22px;
+      margin-bottom: 7px;
+    }
+    .scheduler-table {
+      width: 100%;
+      margin-bottom: 16px;
+      border-spacing: 0 7px;
+      table-layout: fixed;
+    }
+    .scheduler-table th {
+      font-size: 0.8em;
+    }
+    .scheduler-table th,
+    .scheduler-table td {
+      text-align: center;
+      white-space: nowrap;
+      padding: 0 6px;
+    }
+    .scheduler-table th:first-child,
+    .scheduler-table td:first-child {
+      text-align: left;
+    }
+    input[type="time"],
+    input[type="number"],
+    input[type="text"] {
+      height: 28px;
+      font-size: 1em;
+      padding: 2px 4px;
+      box-sizing: border-box;
+    }
+    input[type="time"] {
+      width: 85px;
+    }
+    input[type="number"] {
+      width: 50px;
+    }
+    input[type="text"] {
+      width: 50px;
+    }
+    input[readonly] {
+      background: #eaeaea;
+      border: 1px solid #b0b0b0;
+      color: #3a3a3a;
+    }
+    .fr {
+      float: right;
+    }
+    .clrfix {
+      clear: both;
+    }
+    div.section {
+      margin-top: 5px;
+      padding: 10px;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .btn {
+      padding: 5px 10px;
+      font-size: 1em;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn:active {
+      background: #0056b3;
+    }
+    .channel-buttons {
+      margin-bottom: 10px;
+    }
+    .mr-5 {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="section">
+      <h2>Scheduler</h2>
+      <form id="scheduler-form">
+        <div id="slots-container">Loading...</div>
+        <button type="button" class="btn fr" onClick="fetchSchedulerData();">Refresh</button>
+        <button type="button" class="btn fr mr-5" onClick="saveData();">Save</button>
+        <div class="clrfix"></div>
+      </form>
+    </div>
+    <div class="section">
+      <h2>Manual Trigger</h2>
+      <div id="manual-ch-container">Loading...</div>
+      <button type="button" class="btn fr" onClick="fetchSchedulerData();">Refresh</button>
+      <div class="clrfix"></div>
+    </div>
+    <div class="section">
+      <h2>DS3231</h2>
+      <div id="DS3231-container">Loading...</div>
+      <button type="button" class="btn fr" onClick="buildDS3231();">Refresh</button>
+      <button type="button" class="btn fr mr-5" onClick="updateDS3231();">Update Time</button>
+      <div class="clrfix"></div>
+    </div>
+  </div>
+
+  <script>
+    // === CONFIGURABLE DATA STRUCTURE ===
+    let channels = [];
+    let slots = [];
+    let ds3231Data = {};
+
+    function pad(n) { return n < 10 ? "0" + n : n; }
+
+    function timeObjToStr(obj) {
+      return pad(obj.hour) + ':' + pad(obj.minute);
+    }
+
+    function strToTimeObj(str) {
+      const [h, m] = str.split(':').map(Number);
+      return { hour: h, minute: m };
+    }
+
+    function addMinutesObj(obj, mins) {
+      let total = obj.hour * 60 + obj.minute + Number(mins);
+      let hh = Math.floor(total / 60) % 24;
+      let mm = total % 60;
+      return pad(hh) + ":" + pad(mm);
+    }
+
+    function buildScheduler() {
+      const container = document.getElementById('slots-container');
+      container.innerHTML = '';
+      slots.forEach((slot, slotIdx) => {
+        const slotTitle = document.createElement('div');
+        slotTitle.className = 'slot-title';
+        slotTitle.textContent = slot.name;
+        container.appendChild(slotTitle);
+
+        // Table
+        const table = document.createElement('table');
+        table.className = "scheduler-table";
+        // Header
+        table.innerHTML = `
+          <tr>
+            <th></th>
+            <th>On/Off</th>
+            <th>Start Time</th>
+            <th>Duration in<br>Minutes</th>
+            <th>End Time</th>
+          </tr>
+        `;
+        // Channel rows
+        channels.forEach((ch, chIdx) => {
+          const chName = ch.name;
+          const timeObj = slot.times[chIdx];
+          const tr = document.createElement('tr');
+          const enabled = timeObj.enabled ? 'checked' : '';
+          tr.innerHTML = `
+            <td>${chName}</td>
+            <td>
+              <input type="checkbox" name="enabled_${slotIdx}_${chIdx}" ${enabled}>
+            </td>
+            <td>
+              <input type="time" name="start_${slotIdx}_${chIdx}"
+                value="${timeObjToStr(timeObj.start)}" required>
+            </td>
+            <td>
+              <input type="number" name="duration_${slotIdx}_${chIdx}"
+                value="${timeObj.duration}" min="1" max="1440" required>
+            </td>
+            <td>
+              <input type="text" name="end_${slotIdx}_${chIdx}"
+                value="${addMinutesObj(timeObj.start, timeObj.duration)}" readonly>
+            </td>
+          `;
+          table.appendChild(tr);
+        });
+        container.appendChild(table);
+      });
+    }
+
+    // createa a method which will populate div with id=manual-ch-container with a list of channels and a button to trigger each channel on and off
+    function buildManualTrigger() {
+      const container = document.getElementById('manual-ch-container');
+      container.innerHTML = '';
+
+      channels.forEach((ch, idx) => {
+        // put each ch buttons in a separate div
+        const chDiv = document.createElement('div');
+        chDiv.className = 'channel-buttons';
+        container.appendChild(chDiv);
+
+        const btnOn = document.createElement('button');
+        btnOn.textContent = `Trigger ${ch.name} ON`;
+        btnOn.className = 'trigger-btn mr-5 btn';
+        btnOn.onclick = () => triggerChannel(idx, true);
+        chDiv.appendChild(btnOn);
+
+        const btnOff = document.createElement('button');
+        btnOff.textContent = `Trigger ${ch.name} OFF`;
+        btnOff.className = 'trigger-btn mr-5 btn';
+        btnOff.onclick = () => triggerChannel(idx, false);
+        chDiv.appendChild(btnOff);
+        // create an element to show the current state of the channel
+        const stateDiv = document.createElement('span');
+        stateDiv.textContent = `>: ${ch.state}`;
+        stateDiv.className = 'channel-state';
+        chDiv.appendChild(stateDiv);
+      });
+    }
+
+    // Simulate triggering a channel
+    async function triggerChannel(channelIndex, state) {
+      console.log(`Channel ${channels[channelIndex]} is now ${state ? 'ON' : 'OFF'}`);
+
+      const reqData = {
+        channel: channelIndex,
+        state: state
+      };
+
+      const response = await fetch('channels.json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(channels)
+      });
+
+      if (!response.ok) {
+        alert('Error setting channel: ' + response.statusText);
+        return;
+      }
+
+      fetchSchedulerData();
+    }
+
+    function pad(n) { return n < 10 ? "0" + n : n; }
+
+    function buildDS3231() {
+      const container = document.getElementById('DS3231-container');
+      container.innerHTML = '';   
+      const currentTime = `${pad(ds3231Data.hour)}:${pad(ds3231Data.minute)}:${pad(ds3231Data.second)} ${pad(ds3231Data.day)}/${pad(ds3231Data.month)}/${ds3231Data.year + 2000}`;
+      const ds3231Div = document.createElement('div');
+      ds3231Div.className = 'ds3231-data';
+      ds3231Div.innerHTML = `
+        <p>Current Time: ${currentTime}</p>
+        <p>Temperature: ${ds3231Data.temperature} °C</p>
+      `;
+      container.appendChild(ds3231Div);
+    }
+
+    async function updateDS3231() {
+      const now = new Date();
+      // extract the current time and date in the format required by DS3231
+      let newDS3231DateTime = {};
+      newDS3231DateTime.hour = now.getHours();
+      newDS3231DateTime.minute = now.getMinutes();
+      newDS3231DateTime.second = now.getSeconds();
+      newDS3231DateTime.year = now.getFullYear() - 2000; // DS3231 uses 2000 as base year
+      newDS3231DateTime.month = now.getMonth() + 1; // JS months are 0-11
+      newDS3231DateTime.day = now.getDate();
+      newDS3231DateTime.second = now.getSeconds();
+
+      const response = await fetch('DS3231.json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newDS3231DateTime)
+      });
+
+      if (!response.ok) {
+        alert('Error updating DS3231 data: ' + response.statusText);
+        return;
+      }
+
+      const resp = await response.json();
+      alert('DS3231 data updated successfully!');
+      
+      fetchSchedulerData();
+    }
+
+    function updateEndTimes() {
+      slots.forEach((slot, slotIdx) => {
+        channels.forEach((_, chIdx) => {
+          const timeObj = slots[slotIdx].times[chIdx];
+
+          const startStr = document.querySelector(`[name="start_${slotIdx}_${chIdx}"]`).value;
+          const dur = document.querySelector(`[name="duration_${slotIdx}_${chIdx}"]`).value;
+          const enabledCheckbox = document.querySelector(`[name="enabled_${slotIdx}_${chIdx}"]`);
+
+          timeObj.enabled = enabledCheckbox.checked;
+          timeObj.start = strToTimeObj(startStr);
+          timeObj.duration = Number(dur);
+
+          // update the end time input
+          const endInput = document.querySelector(`[name="end_${slotIdx}_${chIdx}"]`);
+          const startObj = strToTimeObj(startStr);
+          endInput.value = addMinutesObj(startObj, dur);
+        });
+      });
+    }
+
+    async function fetchSchedulerData() {
+      try {
+        const slotsResponse = await fetch('slots.json');
+        if (!slotsResponse.ok) {
+          alert('Error fetching scheduler data: ' + slotsResponse.statusText);
+          return;
+        }
+
+        slots = await slotsResponse.json();
+
+        const channelsResponse = await fetch('channels.json');
+        if (!channelsResponse.ok) {
+          alert('Error fetching channels data: ' + channelsResponse.statusText);
+          return;
+        }
+
+        channels = await channelsResponse.json();
+
+        const ds3231Response = await fetch('DS3231.json');
+        if (!ds3231Response.ok) {
+          alert('Error fetching DS3231 data: ' + ds3231Response.statusText);
+          return;
+        }
+
+        ds3231Data = await ds3231Response.json();
+
+      } catch (error) {
+        alert('Error fetching data: ' + error.message);
+        return;
+      }
+
+      buildScheduler();
+      wireHooks();
+      buildManualTrigger();
+      buildDS3231();
+    }
+
+    function wireHooks() {
+      document.getElementById('slots-container').addEventListener('input', (e) => {
+        updateEndTimes();
+      });
+      document.getElementById('scheduler-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+      });
+    }
+
+    async function saveData() {
+      try {
+        const response = await fetch('slots.json', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(slots)
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const resp = await response.json(); 
+      } catch (error) {
+        alert('Error saving scheduler data: ' + error.message);
+        return;
+      }
+
+      alert('Scheduler data saved successfully!');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchSchedulerData();
+    });
+  </script>
+</body>
+</html>

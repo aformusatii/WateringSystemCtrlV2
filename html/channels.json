@@ -1,0 +1,122 @@
+[
+    {
+        "name": "CH1",
+        "mode": 4,
+        "timer": {
+            "onDurationMs": 2000,
+            "offDurationMs": 5000
+        },
+        "schedules": [
+            {
+                "startHour": 1,
+                "startMinute": 3,
+                "durationMin": 1
+            },
+            {
+                "startHour": 5,
+                "startMinute": 30,
+                "durationMin": 30
+            }
+        ]
+    },
+    {
+        "name": "CH2",
+        "mode": 4,
+        "timer": {
+            "onDurationMs": 5000,
+            "offDurationMs": 5000
+        },
+        "schedules": [
+            {
+                "startHour": 5,
+                "startMinute": 30,
+                "durationMin": 30
+            },
+            {
+                "startHour": 5,
+                "startMinute": 30,
+                "durationMin": 30
+            }
+        ]
+    },
+    {
+        "name": "CH3",
+        "mode": 4,
+        "timer": {
+            "onDurationMs": 5000,
+            "offDurationMs": 5000
+        },
+        "schedules": [
+            {
+                "startHour": 5,
+                "startMinute": 30,
+                "durationMin": 30
+            },
+            {
+                "startHour": 5,
+                "startMinute": 30,
+                "durationMin": 30
+            }
+        ]
+    },
+    {
+        "name": "CH4",
+        "mode": 4,
+        "timer": {
+            "onDurationMs": 5000,
+            "offDurationMs": 5000
+        },
+        "schedules": [
+            {
+                "startHour": 5,
+                "startMinute": 30,
+                "durationMin": 30
+            },
+            {
+                "startHour": 5,
+                "startMinute": 30,
+                "durationMin": 30
+            }
+        ]
+    },
+    {
+        "name": "CH5",
+        "mode": 4,
+        "timer": {
+            "onDurationMs": 5000,
+            "offDurationMs": 5000
+        },
+        "schedules": [
+            {
+                "startHour": 5,
+                "startMinute": 30,
+                "durationMin": 30
+            },
+            {
+                "startHour": 5,
+                "startMinute": 30,
+                "durationMin": 30
+            }
+        ]
+    },
+    {
+        "name": "CH6 bla bla",
+        "mode": 4,
+        "timer": {
+            "onDurationMs": 5000,
+            "offDurationMs": 5000
+        },
+        "schedules": [
+            {
+                "startHour": 5,
+                "startMinute": 30,
+                "durationMin": 30
+            },
+            {
+                "startHour": 5,
+                "startMinute": 30,
+                "durationMin": 30
+            }
+        ]
+    }
+]
