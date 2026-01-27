@@ -1,5 +1,6 @@
 // Do not remove the include below
-#include "ESP8266WateringSystemCtrlV1.h"
+#include "ESP8266WateringSystemCtrlV2.h"
+#include "vuejs.h"
 #include <LittleFS.h>
 
 WiFiHelper wiFiHelper;
@@ -62,7 +63,14 @@ void setup()
 /* ------------------------------------------------------------------------- */
 /*  HTTP Hanlders  */
 void indexPage() {
-	server.send_P(200, "text/html", webpage);
+	server.sendHeader("Content-Encoding", "gzip");
+	server.send_P(200, "text/html", reinterpret_cast<const char*>(webpage_gz), webpage_gz_len);
+}
+
+void vueJs() {
+	server.sendHeader("Cache-Control", "public, max-age=15552000, immutable"); // ~6 months
+	server.sendHeader("Content-Encoding", "gzip");
+	server.send_P(200, "application/javascript", reinterpret_cast<const char*>(vuejs_gz), vuejs_gz_len);
 }
 
 void handleNotFound() {
@@ -328,6 +336,7 @@ void writeJson(int httpStatus, const JsonDocument &doc) {
 
 void setupHTTPActions() {
 	server.on("/", HTTP_GET, indexPage);
+	server.on("/vue.js", HTTP_GET, vueJs);
 
 	server.on("/channels.json", HTTP_GET, getChannels);
 	server.on("/channels.json", HTTP_POST, setChannels);

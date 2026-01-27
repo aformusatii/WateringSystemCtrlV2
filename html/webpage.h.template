@@ -1,0 +1,14 @@
+#ifndef _WEBPAGE_H
+#define _WEBPAGE_H
+
+#include <pgmspace.h>
+
+// Generated on {{generatedOn}}
+
+const uint8_t webpage_gz[] PROGMEM = {
+{{gzippedContent}}
+};
+
+const size_t webpage_gz_len = {{gzippedLength}};
+  
+#endif

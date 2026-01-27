@@ -1,440 +1,406 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dynamic Channel Controls</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-
-        .channel-panel {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 20px;
-            background-color: #eee;
-        }
-
-        .channel-header {
-            display: flex;
-            align-items: center;
-        }
-
-        .channel-header .channel-label {
-            padding: 5px 10px;
-            border: 1px solid #ccc;
-            background: #f0f0f0;
-            margin-right: 5px;
-        }
-
-        .channel-header .channel-name-input {
-            flex: 1;
-            padding: 5px;
-            font-size: 1em;
-            border: 1px solid #ccc;
-            margin-right: 5px;
-        }
-
-        .mode-selector {
-            margin-top: 10px;
-            display: flex;
-        }
-
-        .mode-button {
-            border: 1px solid #ccc;
-            background: #fff;
-            padding: 5px 10px;
-            margin-right: -1px;
-            cursor: pointer;
-        }
-
-        .mode-button.active {
-            background: #d0e7ff;
-        }
-
-        .timer-settings,
-        .scheduler-settings {
-            margin-top: 10px;
-        }
-
-        .timer-settings label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .timer-settings input {
-            margin-left: 5px;
-        }
-
-        .scheduler-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-
-        .scheduler-row .slot-label {
-            margin-right: 10px;
-        }
-
-        .scheduler-row label {
-            margin-right: 10px;
-            font-size: 0.9em;
-        }
-
-        .scheduler-row input {
-            width: 70px;
-            margin-right: 10px;
-        }
-
-        .scheduler-settings input[readonly] {
-            background: #eee;
-            border: 1px solid #ccc;
-        }
-
-        .footer-buttons {
-            text-align: right;
-        }
-
-        .footer-buttons button {
-            margin-left: 10px;
-            padding: 5px 15px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Watering System Channels</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --border: #d7dce3;
+      --text: #1f2430;
+      --muted: #5c6370;
+      --accent: #2f80ed;
+      --accent-weak: #e7f1ff;
+      --danger: #d7263d;
+      --shadow: 0 8px 20px rgba(31, 36, 48, 0.08);
+      --radius: 10px;
+      --space: 16px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: 'Montserrat', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    p.subtitle {
+      margin: 0 0 20px;
+      color: var(--muted);
+    }
+    .grid {
+      display: grid;
+      gap: var(--space);
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--space);
+      box-shadow: var(--shadow);
+    }
+    .channel-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .chip {
+      padding: 6px 12px;
+      background: var(--accent-weak);
+      color: var(--accent);
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+    .input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    .input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.15);
+    }
+    .mode-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .mode-btn {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all 0.15s ease;
+    }
+    .mode-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 8px 16px rgba(47, 128, 237, 0.25);
+    }
+    .mode-btn:active { transform: translateY(1px); }
+    .section-title {
+      margin: 14px 0 8px;
+      font-size: 0.95rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      font-weight: 700;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      align-items: center;
+    }
+    label {
+      font-size: 0.9rem;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .inline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .end-time {
+      padding: 10px 12px;
+      background: #f2f4f8;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      min-width: 90px;
+      text-align: center;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+    .btn {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      transition: box-shadow 0.15s ease, transform 0.1s ease;
+    }
+    .btn.secondary {
+      background: #eef1f6;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .loading {
+      text-align: center;
+      color: var(--muted);
+      padding: 20px;
+    }
+    .ds-card h2 { margin: 0 0 6px; }
+    .ds-meta { color: var(--muted); margin: 0 0 10px; }
+    .status { color: var(--muted); font-size: 0.9rem; }
+  </style>
 </head>
-
 <body>
-    <div id="channels-container"></div>
+  <div id="app" class="grid">
+    <header>
+      <h1>Channel Manager</h1>
+      <p class="subtitle">Configure modes, timers, schedules, and sync the DS3231 clock. API endpoints remain unchanged.</p>
+      <div class="status" v-if="message">{{ message }}</div>
+    </header>
 
-    <div class="footer-buttons">
-        <button id="save-button" onClick="saveChannelsData();">Save</button>
-    </div>
+    <div v-if="loading" class="loading">Loading...</div>
 
-    <div class="section">
+    <section v-else class="grid">
+      <article class="card" v-for="(channel, index) in channels" :key="index">
+        <div class="channel-head">
+          <div class="chip">CH {{ index + 1 }}</div>
+          <input class="input" type="text" v-model="channel.name" :placeholder="`Channel ${index + 1}`">
+        </div>
+
+        <div class="mode-row">
+          <button
+            v-for="option in modeOptions"
+            :key="option.key"
+            class="mode-btn"
+            :class="{ active: channel.mode === option.key }"
+            @click="setMode(channel, option.key)">
+            {{ option.label }}
+          </button>
+        </div>
+
+        <div v-if="channel.mode === modeKeys.timer">
+          <div class="section-title">Timer</div>
+          <div class="row">
+            <div>
+              <label>On Period (ms)</label>
+              <input class="input" type="number" min="0" :value="channel.timer.onDurationMs" @input="updateTimer(channel, 'onDurationMs', $event.target.value)">
+            </div>
+            <div>
+              <label>Off Period (ms)</label>
+              <input class="input" type="number" min="0" :value="channel.timer.offDurationMs" @input="updateTimer(channel, 'offDurationMs', $event.target.value)">
+            </div>
+          </div>
+        </div>
+
+        <div v-if="channel.mode === modeKeys.schedule">
+          <div class="section-title">Scheduler</div>
+          <div class="grid" style="gap:12px">
+            <div class="inline" v-for="(slot, slotIndex) in channel.schedules" :key="slotIndex">
+              <div style="font-weight:700; min-width:58px;">Slot {{ slotIndex + 1 }}</div>
+              <div>
+                <label>Start</label>
+                <input class="input" style="min-width:120px" type="time" :value="timeString(slot)" @input="updateStart(slot, $event.target.value)">
+              </div>
+              <div>
+                <label>Duration (min)</label>
+                <input class="input" style="max-width:120px" type="number" min="0" :value="slot.durationMin" @input="slot.durationMin = toNumber($event.target.value)">
+              </div>
+              <div>
+                <label>Ends</label>
+                <div class="end-time">{{ endTime(slot) }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="actions" style="justify-content:flex-start;">
+          <button class="btn" :disabled="saving" @click="saveChannels">
+            {{ saving ? 'Saving...' : 'Save Channels' }}
+          </button>
+          <button class="btn secondary" :disabled="loading" @click="refreshAll">Refresh</button>
+        </div>
+      </article>
+
+      <article class="card ds-card">
         <h2>DS3231</h2>
-        <div id="DS3231-container">Loading...</div>
-        <button type="button" class="btn fr" onClick="refreshDS3231();">Refresh</button>
-        <button type="button" class="btn fr mr-5" onClick="updateDS3231();">Update Time</button>
-        <div class="clrfix"></div>
-    </div>
+        <p class="ds-meta" v-if="ds3231">
+          Current Time: {{ formattedClock }}<br>
+          Temperature: {{ ds3231.temperature }} °C
+        </p>
+        <p class="ds-meta" v-else>Loading clock data...</p>
+        <div class="actions">
+          <button class="btn secondary" :disabled="clockBusy" @click="refreshClock">Refresh</button>
+          <button class="btn" :disabled="clockBusy" @click="updateClock">Update Time</button>
+        </div>
+      </article>
+    </section>
+  </div>
 
-    <script>
-        // Mode mapping: 1=Off, 2=Manual, 3=Timer, 4=Scheduler
-        const modes = [
-            { key: 4, name: 'Off' },
-            { key: 3, name: 'Manual' },
-            { key: 2, name: 'Timer' },
-            { key: 1, name: 'Scheduler' }
-        ];
+  <script src="vue.js"></script>
 
-        const modeMap = modes.reduce((acc, mode) => {
-            acc[mode.key] = mode.name.toLowerCase();
-            return acc;
-        }, {});
+  <script>
+    const { createApp } = Vue;
 
-        let channels = [];
-        let ds3231Data = {};
-
-        async function buildChannels() {
-            const container = document.getElementById('channels-container');
-
-            channels.forEach((chData, index) => {
-                const chIndex = index + 1;
-                const panel = document.createElement('div');
-                panel.className = 'channel-panel';
-                panel.id = `channel-${chIndex}`;
-
-                // Header with editable channel name
-                const header = document.createElement('div');
-                header.className = 'channel-header';
-
-                const label = document.createElement('span');
-                label.className = 'channel-label';
-                label.textContent = `CH ${chIndex}`;
-                header.appendChild(label);
-
-                const nameInput = document.createElement('input');
-                nameInput.type = 'text';
-                nameInput.className = 'channel-name-input';
-                nameInput.id = `channel${chIndex}-name`;
-                nameInput.value = chData.name;
-                nameInput.dataset.channel = chIndex;
-                nameInput.addEventListener('change', (e) => {
-                    const channelIndex = e.target.dataset.channel - 1;
-                    channels[channelIndex].name = e.target.value;
-                });
-                header.appendChild(nameInput);
-
-                panel.appendChild(header);
-
-                // Mode buttons
-                const modeDiv = document.createElement('div');
-                modeDiv.className = 'mode-selector';
-                modes.forEach((modeObj, idx) => {
-                    const btn = document.createElement('button');
-                    btn.textContent = modeObj.name;
-                    btn.className = 'mode-button';
-                    btn.dataset.channel = chIndex;
-                    btn.dataset.mode = modeObj.key;
-                    if (chData.mode === modeObj.key) btn.classList.add('active');
-                    modeDiv.appendChild(btn);
-                });
-                panel.appendChild(modeDiv);
-
-                // Timer settings
-                const timerDiv = document.createElement('div');
-                timerDiv.className = 'timer-settings';
-                timerDiv.id = `channel${chIndex}-timer`;
-                if (modeMap[chData.mode] !== 'timer') timerDiv.style.display = 'none';
-
-                ['onDurationMs', 'offDurationMs'].forEach(key => {
-                    const label = document.createElement('label');
-                    label.textContent = key === 'onDurationMs' ? 'On Period (ms):' : 'Off Period (ms):';
-                    const input = document.createElement('input');
-                    input.type = 'number';
-                    input.min = '0';
-                    input.id = `channel${chIndex}-${key}`;
-                    input.value = chData.timer[key];
-                    input.dataset.channel = chIndex;
-                    input.addEventListener('change', (e) => {
-                        const channelIndex = e.target.dataset.channel - 1;
-                        channels[channelIndex].timer[key] = parseInt(e.target.value);
-                    });
-                    label.appendChild(input);
-                    timerDiv.appendChild(label);
-                });
-                panel.appendChild(timerDiv);
-
-                // Scheduler settings
-                const schedDiv = document.createElement('div');
-                schedDiv.className = 'scheduler-settings';
-                schedDiv.id = `channel${chIndex}-scheduler`;
-                if (modeMap[chData.mode] !== 'scheduler') schedDiv.style.display = 'none';
-
-                chData.schedules.forEach((slotData, slotIdx) => {
-                    const row = document.createElement('div');
-                    row.className = 'scheduler-row';
-
-                    const slotLabel = document.createElement('label');
-                    slotLabel.className = 'slot-label';
-                    slotLabel.textContent = `Slot ${slotIdx + 1}:`;
-                    row.appendChild(slotLabel);
-
-                    const startLbl = document.createElement('label');
-                    startLbl.textContent = 'Start Time';
-                    const startInput = document.createElement('input');
-                    startInput.type = 'time';
-                    startInput.id = `channel${chIndex}-slot${slotIdx + 1}-start`;
-                    startInput.value = `${String(slotData.startHour).padStart(2, '0')}:${String(slotData.startMinute).padStart(2, '0')}`;
-                    startInput.dataset.channel = chIndex;
-                    startInput.addEventListener('change', (e) => {
-                        const channelIndex = e.target.dataset.channel - 1;
-                        const [hh, mm] = e.target.value.split(':').map(Number);
-                        channels[channelIndex].schedules[slotIdx].startHour = hh;
-                        channels[channelIndex].schedules[slotIdx].startMinute = mm;
-                    });
-                    startLbl.appendChild(startInput);
-                    row.appendChild(startLbl);
-
-                    const durLbl = document.createElement('label');
-                    durLbl.textContent = 'Duration (min)';
-                    const durInput = document.createElement('input');
-                    durInput.type = 'number';
-                    durInput.min = '0';
-                    durInput.id = `channel${chIndex}-slot${slotIdx + 1}-duration`;
-                    durInput.value = slotData.durationMin;
-                    durInput.dataset.channel = chIndex;
-                    durInput.addEventListener('change', (e) => {
-                        const channelIndex = e.target.dataset.channel - 1;
-                        channels[channelIndex].schedules[slotIdx].durationMin = parseInt(e.target.value);
-                    });
-                    durLbl.appendChild(durInput);
-                    row.appendChild(durLbl);
-
-                    const endLbl = document.createElement('label');
-                    endLbl.textContent = 'End Time';
-                    const endInput = document.createElement('input');
-                    endInput.type = 'time';
-                    endInput.readOnly = true;
-                    endInput.id = `channel${chIndex}-slot${slotIdx + 1}-end`;
-                    endLbl.appendChild(endInput);
-                    row.appendChild(endLbl);
-
-                    schedDiv.appendChild(row);
-                });
-                panel.appendChild(schedDiv);
-
-                container.appendChild(panel);
-            });
-
-            // Listeners for mode toggle
-            document.querySelectorAll('.mode-button').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const ch = btn.dataset.channel;
-                    const mode = btn.dataset.mode;
-
-                    const channelIndex = e.target.dataset.channel - 1;
-                    channels[channelIndex].mode = parseInt(e.target.dataset.mode);
-
-                    document.querySelectorAll(`#channel-${ch} .mode-button.active`).forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-
-                    document.getElementById(`channel${ch}-timer`).style.display = (modeMap[mode] === 'timer') ? 'block' : 'none';
-                    document.getElementById(`channel${ch}-scheduler`).style.display = (modeMap[mode] === 'scheduler') ? 'block' : 'none';
-                });
-            });
-
-            // Compute end times
-            const computeEnd = (startVal, durVal) => {
-                const [h, m] = startVal.split(':').map(Number);
-                const total = h * 60 + m + parseInt(durVal, 10);
-                const hh = String(Math.floor((total % (24 * 60)) / 60)).padStart(2, '0');
-                const mm = String(total % 60).padStart(2, '0');
-                return `${hh}:${mm}`;
-            };
-
-            channels.forEach((_, idx) => {
-                const chIndex = idx + 1;
-                channels[idx].schedules.forEach((_, slotIdx) => {
-                    const sInput = document.getElementById(`channel${chIndex}-slot${slotIdx + 1}-start`);
-                    const dInput = document.getElementById(`channel${chIndex}-slot${slotIdx + 1}-duration`);
-                    const eInput = document.getElementById(`channel${chIndex}-slot${slotIdx + 1}-end`);
-                    const update = () => eInput.value = computeEnd(sInput.value, dInput.value);
-                    sInput.addEventListener('input', update);
-                    dInput.addEventListener('input', update);
-                    update();
-                });
-            });
+    createApp({
+      data() {
+        return {
+          modeKeys: { schedule: 1, timer: 2, manual: 3, off: 4 },
+          modeOptions: [
+            { key: 4, label: 'Off' },
+            { key: 3, label: 'Manual' },
+            { key: 2, label: 'Timer' },
+            { key: 1, label: 'Scheduler' }
+          ],
+          channels: [],
+          ds3231: null,
+          loading: true,
+          saving: false,
+          clockBusy: false,
+          message: ''
         };
-
-        function pad(n) { return n < 10 ? "0" + n : n; }
-
-        async function refreshDS3231() {
-            await fetchDS3231Data();
-            buildDS3231();
+      },
+      computed: {
+        formattedClock() {
+          if (!this.ds3231) return '—';
+          const y = 2000 + Number(this.ds3231.year || 0);
+          return `${this.pad(this.ds3231.hour)}:${this.pad(this.ds3231.minute)}:${this.pad(this.ds3231.second)} ${this.pad(this.ds3231.day)}/${this.pad(this.ds3231.month)}/${y}`;
         }
-
-        function buildDS3231() {
-            const container = document.getElementById('DS3231-container');
-            container.innerHTML = '';   
-            const currentTime = `${pad(ds3231Data.hour)}:${pad(ds3231Data.minute)}:${pad(ds3231Data.second)} ${pad(ds3231Data.day)}/${pad(ds3231Data.month)}/${ds3231Data.year + 2000}`;
-            const ds3231Div = document.createElement('div');
-            ds3231Div.className = 'ds3231-data';
-            ds3231Div.innerHTML = `
-                <p>Current Time: ${currentTime}</p>
-                <p>Temperature: ${ds3231Data.temperature} °C</p>
-            `;
-            container.appendChild(ds3231Div);
-        }
-
-        async function updateDS3231() {
+      },
+      methods: {
+        pad(value) {
+          return String(value).padStart(2, '0');
+        },
+        toNumber(value) {
+          const n = parseInt(value, 10);
+          return Number.isFinite(n) ? n : 0;
+        },
+        timeString(slot) {
+          return `${this.pad(slot.startHour)}:${this.pad(slot.startMinute)}`;
+        },
+        endTime(slot) {
+          const start = (this.toNumber(slot.startHour) * 60) + this.toNumber(slot.startMinute);
+          const total = start + this.toNumber(slot.durationMin);
+          const hh = this.pad(Math.floor((total % 1440) / 60));
+          const mm = this.pad(total % 60);
+          return `${hh}:${mm}`;
+        },
+        updateStart(slot, value) {
+          const [h, m] = value.split(':').map(v => this.toNumber(v));
+          slot.startHour = h;
+          slot.startMinute = m;
+        },
+        updateTimer(channel, key, value) {
+          channel.timer[key] = this.toNumber(value);
+        },
+        setMode(channel, mode) {
+          channel.mode = mode;
+        },
+        async loadChannels() {
+          const res = await fetch('channels.json');
+          if (!res.ok) throw new Error(res.statusText);
+          this.channels = await res.json();
+        },
+        async loadClock() {
+          const res = await fetch('DS3231.json');
+          if (!res.ok) throw new Error(res.statusText);
+          this.ds3231 = await res.json();
+        },
+        async refreshAll() {
+          this.loading = true;
+          this.message = '';
+          try {
+            await Promise.all([this.loadChannels(), this.loadClock()]);
+          } catch (err) {
+            this.message = `Error loading data: ${err.message}`;
+          } finally {
+            this.loading = false;
+          }
+        },
+        async saveChannels() {
+          this.saving = true;
+          this.message = '';
+          try {
+            const res = await fetch('channels.json', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.channels)
+            });
+            if (!res.ok) throw new Error(res.statusText);
+            this.message = 'Channels saved';
+          } catch (err) {
+            this.message = `Save failed: ${err.message}`;
+          } finally {
+            this.saving = false;
+          }
+        },
+        async refreshClock() {
+          this.clockBusy = true;
+          this.message = '';
+          try {
+            await this.loadClock();
+          } catch (err) {
+            this.message = `Clock refresh failed: ${err.message}`;
+          } finally {
+            this.clockBusy = false;
+          }
+        },
+        async updateClock() {
+          this.clockBusy = true;
+          this.message = '';
+          try {
             const now = new Date();
-            // extract the current time and date in the format required by DS3231
-            let newDS3231DateTime = {};
-            newDS3231DateTime.hour = now.getHours();
-            newDS3231DateTime.minute = now.getMinutes();
-            newDS3231DateTime.second = now.getSeconds();
-            newDS3231DateTime.year = now.getFullYear() - 2000; // DS3231 uses 2000 as base year
-            newDS3231DateTime.month = now.getMonth() + 1; // JS months are 0-11
-            newDS3231DateTime.day = now.getDate();
-            newDS3231DateTime.second = now.getSeconds();
-
-            const response = await fetch('DS3231.json', {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(newDS3231DateTime)
+            const payload = {
+              hour: now.getHours(),
+              minute: now.getMinutes(),
+              second: now.getSeconds(),
+              year: now.getFullYear() - 2000,
+              month: now.getMonth() + 1,
+              day: now.getDate()
+            };
+            const res = await fetch('DS3231.json', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
             });
-
-            if (!response.ok) {
-                alert('Error updating DS3231 data: ' + response.statusText);
-                return;
-            }
-
-            const resp = await response.json();
-            alert('DS3231 data updated successfully!');
+            if (!res.ok) throw new Error(res.statusText);
+            await this.loadClock();
+            this.message = 'Clock updated';
+          } catch (err) {
+            this.message = `Clock update failed: ${err.message}`;
+          } finally {
+            this.clockBusy = false;
+          }
         }
-
-        async function fetchDS3231Data() {
-            try {
-                const channelsResponse = await fetch('channels.json');
-                if (!channelsResponse.ok) {
-                alert('Error fetching channels data: ' + channelsResponse.statusText);
-                return;
-                }
-
-                channels = await channelsResponse.json();
-
-                const ds3231Response = await fetch('DS3231.json');
-                if (!ds3231Response.ok) {
-                alert('Error fetching DS3231 data: ' + ds3231Response.statusText);
-                return;
-                }
-
-                ds3231Data = await ds3231Response.json();
-
-            } catch (error) {
-                alert('Error fetching data: ' + error.message);
-                return;
-            }
-        }
-
-        async function fetchChannels() {
-            try {
-                const channelsResponse = await fetch('channels.json');
-                if (!channelsResponse.ok) {
-                alert('Error fetching channels data: ' + channelsResponse.statusText);
-                return;
-                }
-
-                channels = await channelsResponse.json();
-
-                const ds3231Response = await fetch('DS3231.json');
-                if (!ds3231Response.ok) {
-                alert('Error fetching DS3231 data: ' + ds3231Response.statusText);
-                return;
-                }
-
-                ds3231Data = await ds3231Response.json();
-
-            } catch (error) {
-                alert('Error fetching data: ' + error.message);
-                return;
-            }
-        }
-
-        async function saveChannelsData() {
-            console.log("Saving data...", channels);
-
-            const response = await fetch('channels.json', {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(channels)
-            });
-
-            if (!response.ok) {
-                alert('Error setting channel: ' + response.statusText);
-                return;
-            }
-        }
-
-        async function onPageLoad() {
-            await fetchChannels();
-            await buildChannels();
-
-            await fetchDS3231Data();
-            buildDS3231();
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            onPageLoad()
-        });
-    </script>
+      },
+      mounted() {
+        this.refreshAll();
+      }
+    }).mount('#app');
+  </script>
 </body>
-
 </html>

@@ -5,3 +5,7 @@
 .vscode/ipch
 
 include/secrets.h
+
+node_modules/
+package-lock.json
+index.minified.html

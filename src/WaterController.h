@@ -16,7 +16,7 @@ struct RTCTimeStruct {
 #define CHANNEL_GPIO_MAIN_WATER_PIN   15
 
 #define MAX_CHANNELS                  6
-#define MAX_TIME_SLOTS                2
+#define MAX_TIME_SLOTS                4
 
 #define CONFIG_FILE_SLOTS             1
 #define CONFIG_FILE_CHANNELS          2
