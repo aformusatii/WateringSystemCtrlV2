@@ -12,47 +12,54 @@ void WaterController::begin() {
 }
 
 void WaterController::initializeChannels() {
+	u_int8_t channel_index = 0;
+	
 	// === Channel 1 ===
-	channels[0].index = 0;
-    channels[0].name = "CH1";
-    channels[0].mode = CHANNEL_MODE_MANUAL_OFF;
-    channels[0].gpio = CHANNEL_GPIO_RELAY;
-    channels[0].pin = 14;
+	channels[channel_index].index = channel_index;
+    channels[channel_index].name = "CH1";
+    channels[channel_index].mode = CHANNEL_MODE_MANUAL_OFF;
+    channels[channel_index].gpio = CHANNEL_GPIO_RELAY;
+    channels[channel_index].pin = 14;
 
 	// === Channel 2 ===
-	channels[1].index = 1;
-    channels[1].name = "CH2";
-    channels[1].mode = CHANNEL_MODE_MANUAL_OFF;
-    channels[1].gpio = CHANNEL_GPIO_RELAY;
-    channels[1].pin = 13;
+	channel_index++;
+	channels[channel_index].index = channel_index;
+    channels[channel_index].name = "CH2";
+    channels[channel_index].mode = CHANNEL_MODE_MANUAL_OFF;
+    channels[channel_index].gpio = CHANNEL_GPIO_RELAY;
+    channels[channel_index].pin = 13;
 
 	// === Channel 3 ===
-	channels[2].index = 2;
-    channels[2].name = "CH3";
-    channels[2].mode = CHANNEL_MODE_MANUAL_OFF;
-    channels[2].gpio = CHANNEL_GPIO_RELAY;
-    channels[2].pin = 12;
+	channel_index++;
+	channels[channel_index].index = channel_index;
+    channels[channel_index].name = "CH3";
+    channels[channel_index].mode = CHANNEL_MODE_MANUAL_OFF;
+    channels[channel_index].gpio = CHANNEL_GPIO_RELAY;
+    channels[channel_index].pin = 12;
 
 	// === Channel 4 ===
-	channels[3].index = 3;
-    channels[3].name = "CH4";
-    channels[3].mode = CHANNEL_MODE_MANUAL_OFF;
-    channels[3].gpio = CHANNEL_GPIO_RELAY;
-    channels[3].pin = 11;
+	channel_index++;
+	channels[channel_index].index = channel_index;
+    channels[channel_index].name = "CH4";
+    channels[channel_index].mode = CHANNEL_MODE_MANUAL_OFF;
+    channels[channel_index].gpio = CHANNEL_GPIO_RELAY;
+    channels[channel_index].pin = 11;
 
 	// === Channel 5 ===
-	channels[4].index = 4;
-    channels[4].name = "CH5";
-    channels[4].mode = CHANNEL_MODE_MANUAL_OFF;
-    channels[4].gpio = CHANNEL_GPIO_RELAY;
-    channels[4].pin = 10;
+	channel_index++;
+	channels[channel_index].index = channel_index;
+    channels[channel_index].name = "CH5";
+    channels[channel_index].mode = CHANNEL_MODE_MANUAL_OFF;
+    channels[channel_index].gpio = CHANNEL_GPIO_RELAY;
+    channels[channel_index].pin = 10;
 
 	// === Channel 6 ===
-	channels[5].index = 5;
-    channels[5].name = "CH6";
-    channels[5].mode = CHANNEL_MODE_MANUAL_OFF;
-    channels[5].gpio = CHANNEL_GPIO_RELAY;
-    channels[5].pin = 0;
+	channel_index++;
+	channels[channel_index].index = channel_index;
+    channels[channel_index].name = "CH6";
+    channels[channel_index].mode = CHANNEL_MODE_MANUAL_OFF;
+    channels[channel_index].gpio = CHANNEL_GPIO_RELAY;
+    channels[channel_index].pin = 0;
 
     for (uint8_t ch = 0; ch < MAX_CHANNELS; ++ch) {
     	channels[ch].open = false;
