@@ -13,7 +13,7 @@ void WaterController::begin() {
 
 void WaterController::initializeChannels() {
 	u_int8_t channel_index = 0;
-	
+
 	// === Channel 1 ===
 	channels[channel_index].index = channel_index;
     channels[channel_index].name = "CH1";
@@ -181,6 +181,7 @@ void WaterController::applyChannelsToHardware()
     // The relay board is actually enabled by dedicated pin
     pcfValues |= (1 << CHANNEL_GPIO_RELAY_ON_PIN);
 
+	// enable or disable the safety valve
     if (haveChannelsOpen) {
     	pcfValues &= ~(1 << CHANNEL_GPIO_MAIN_WATER_PIN);
     } else {
