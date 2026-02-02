@@ -49,6 +49,7 @@ bool handleFileRead(String);
 void handleFileUpload();
 void handleFileDelete();
 void handleSpiffsInfo();
+void getHardwareInfo();
 
 //Do not add code below this line
 #endif /* _ESP8266WateringSystemCtrlV1_H_ */

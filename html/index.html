@@ -171,6 +171,29 @@
     .ds-card h2 { margin: 0 0 6px; }
     .ds-meta { color: var(--muted); margin: 0 0 10px; }
     .status { color: var(--muted); font-size: 0.9rem; }
+    .hw-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .hw-item {
+      background: #f7f9fc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .hw-key {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: 0 0 4px;
+    }
+    .hw-val {
+      margin: 0;
+      font-weight: 700;
+      color: var(--text);
+      word-break: break-word;
+    }
     .file-input {
       width: 100%;
       padding: 10px 12px;
@@ -294,8 +317,64 @@
             {{ ota.busy ? 'Uploading...' : 'Upload Firmware' }}
           </button>
           <button class="btn secondary" :disabled="ota.busy" @click="clearFirmware">Clear</button>
+          <button class="btn secondary" :disabled="hardwareLoading" @click="loadHardware">
+            {{ hardwareLoading ? 'Loading...' : 'Load Hardware Info' }}
+          </button>
         </div>
         <p class="status" v-if="ota.status">{{ ota.status }}</p>
+        <div v-if="hardware" class="hw-grid">
+          <div class="hw-item">
+            <p class="hw-key">Chip ID</p><p class="hw-val">{{ hex(hardware.chipId) }}</p>
+          </div>
+          <div class="hw-item">
+            <p class="hw-key">CPU MHz</p><p class="hw-val">{{ hardware.cpuMHz }}</p>
+          </div>
+          <div class="hw-item">
+            <p class="hw-key">Flash (reported)</p><p class="hw-val">{{ kb(hardware.flashSizeId) }}</p>
+          </div>
+          <div class="hw-item">
+            <p class="hw-key">Flash (real)</p><p class="hw-val">{{ kb(hardware.flashSizeReal) }}</p>
+          </div>
+          <div class="hw-item">
+            <p class="hw-key">Flash Speed</p><p class="hw-val">{{ hardware.flashSpeed }} Hz</p>
+          </div>
+          <div class="hw-item">
+            <p class="hw-key">Flash Mode</p><p class="hw-val">{{ hardware.flashMode }}</p>
+          </div>
+          <div class="hw-item">
+            <p class="hw-key">Sketch Size</p><p class="hw-val">{{ kb(hardware.sketchSize) }}</p>
+          </div>
+          <div class="hw-item">
+            <p class="hw-key">Free Sketch</p><p class="hw-val">{{ kb(hardware.freeSketchSpace) }}</p>
+          </div>
+          <div class="hw-item">
+            <p class="hw-key">Free Heap</p><p class="hw-val">{{ hardware.freeHeap }} B</p>
+          </div>
+          <div class="hw-item" v-if="hardware.sdkVersion">
+            <p class="hw-key">SDK</p><p class="hw-val">{{ hardware.sdkVersion }}</p>
+          </div>
+          <div class="hw-item" v-if="hardware.resetReason">
+            <p class="hw-key">Reset Reason</p><p class="hw-val">{{ hardware.resetReason }}</p>
+          </div>
+          <div class="hw-item" v-if="hardware.littlefs">
+            <p class="hw-key">LittleFS Total</p><p class="hw-val">{{ kb(hardware.littlefs.total) }}</p>
+          </div>
+          <div class="hw-item" v-if="hardware.littlefs">
+            <p class="hw-key">LittleFS Used</p><p class="hw-val">{{ kb(hardware.littlefs.used) }}</p>
+          </div>
+          <div class="hw-item" v-if="hardware.littlefs">
+            <p class="hw-key">LittleFS Free</p><p class="hw-val">{{ kb(hardware.littlefs.free) }}</p>
+          </div>
+          <div class="hw-item" v-if="hardware.network">
+            <p class="hw-key">IP</p><p class="hw-val">{{ hardware.network.ip }}</p>
+          </div>
+          <div class="hw-item" v-if="hardware.network">
+            <p class="hw-key">SSID</p><p class="hw-val">{{ hardware.network.ssid }}</p>
+          </div>
+          <div class="hw-item" v-if="hardware.network">
+            <p class="hw-key">RSSI</p><p class="hw-val">{{ hardware.network.rssi }} dBm</p>
+          </div>
+        </div>
       </article>
     </section>
   </div>
@@ -325,7 +404,9 @@
             file: null,
             status: '',
             busy: false
-          }
+          },
+          hardware: null,
+          hardwareLoading: false
         };
       },
       computed: {
@@ -479,6 +560,27 @@
           } finally {
             this.ota.busy = false;
           }
+        },
+        async loadHardware() {
+          this.hardwareLoading = true;
+          this.message = '';
+          try {
+            const res = await fetch('/hardware.json');
+            if (!res.ok) throw new Error(res.statusText);
+            this.hardware = await res.json();
+          } catch (err) {
+            this.message = `Hardware info failed: ${err.message}`;
+          } finally {
+            this.hardwareLoading = false;
+          }
+        },
+        kb(bytes) {
+          if (!bytes && bytes !== 0) return '—';
+          return `${(bytes / 1024).toFixed(1)} KB`;
+        },
+        hex(val) {
+          if (val === undefined || val === null) return '—';
+          return '0x' + Number(val).toString(16).toUpperCase().padStart(6, '0');
         }
       },
       mounted() {

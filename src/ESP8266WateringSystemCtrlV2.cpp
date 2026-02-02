@@ -32,6 +32,57 @@ unsigned long schedulerPreviousMillis = 0;
 // File upload handler
 File fsUploadFile; // a File object to temporarily store the upload
 
+const char* flashModeToString(FlashMode_t mode) {
+	switch (mode) {
+	case FM_QIO: return "QIO";
+	case FM_QOUT: return "QOUT";
+	case FM_DIO: return "DIO";
+	case FM_DOUT: return "DOUT";
+	case FM_UNKNOWN:
+	default: return "UNKNOWN";
+	}
+}
+
+void fillHardwareInfo(JsonDocument &doc) {
+	doc["chipId"] = ESP.getChipId();
+	doc["cpuMHz"] = ESP.getCpuFreqMHz();
+	doc["flashSizeId"] = ESP.getFlashChipSize();
+	doc["flashSizeReal"] = ESP.getFlashChipRealSize();
+	doc["flashSpeed"] = ESP.getFlashChipSpeed();
+	doc["flashMode"] = flashModeToString(ESP.getFlashChipMode());
+	doc["sketchSize"] = ESP.getSketchSize();
+	doc["freeSketchSpace"] = ESP.getFreeSketchSpace();
+	doc["freeHeap"] = ESP.getFreeHeap();
+	doc["sdkVersion"] = ESP.getSdkVersion();
+	doc["resetReason"] = ESP.getResetReason();
+
+	FSInfo fsInfo;
+	if (LittleFS.info(fsInfo)) {
+		JsonObject fs = doc["littlefs"].to<JsonObject>();
+		fs["total"] = fsInfo.totalBytes;
+		fs["used"] = fsInfo.usedBytes;
+		fs["free"] = (fsInfo.totalBytes > fsInfo.usedBytes) ? (fsInfo.totalBytes - fsInfo.usedBytes) : 0;
+		fs["pageSize"] = fsInfo.pageSize;
+		fs["blockSize"] = fsInfo.blockSize;
+	} else {
+		doc["littlefsError"] = "LittleFS.info() failed";
+	}
+
+	if (WiFi.isConnected()) {
+		JsonObject net = doc["network"].to<JsonObject>();
+		net["ip"] = WiFi.localIP().toString();
+		net["mac"] = WiFi.macAddress();
+		net["ssid"] = WiFi.SSID();
+		net["rssi"] = WiFi.RSSI();
+	}
+}
+
+void getHardwareInfo() {
+	JsonDocument doc;
+	fillHardwareInfo(doc);
+	writeJson(200, doc);
+}
+
 
 //The setup function is called once at startup of the sketch
 void setup()
@@ -351,6 +402,7 @@ void setupHTTPActions() {
 		server.send(200, "text/html","<h2>Upload Done. <a href='/'>Go Back</a></h2>");
 	}, handleFileUpload);
 	server.on("/spiffsinfo", HTTP_GET, handleSpiffsInfo);
+	server.on("/hardware.json", HTTP_GET, getHardwareInfo);
 
 	// Not found handler
 	server.onNotFound(handleNotFound);
