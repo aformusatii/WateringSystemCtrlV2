@@ -13,6 +13,7 @@
 #include "Logger.h"
 
 #include <secrets.h>
+#include <ESP8266HTTPUpdateServer.h>
 
 // #define NOT_SEQUENTIAL_PINOUT
 #include "PCF8575.h"

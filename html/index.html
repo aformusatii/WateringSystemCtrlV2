@@ -171,6 +171,24 @@
     .ds-card h2 { margin: 0 0 6px; }
     .ds-meta { color: var(--muted); margin: 0 0 10px; }
     .status { color: var(--muted); font-size: 0.9rem; }
+    .file-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      background: #f9fbff;
+      cursor: pointer;
+    }
+    .file-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.15);
+    }
+    .hint {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
@@ -258,6 +276,27 @@
           <button class="btn" :disabled="clockBusy" @click="updateClock">Update Time</button>
         </div>
       </article>
+
+      <article class="card ds-card">
+        <h2>Firmware Update</h2>
+        <p class="ds-meta">
+          Upload a compiled ESP8266 firmware (.bin). The device will reboot automatically after a successful upload.
+        </p>
+        <div class="row">
+          <div>
+            <label for="firmwareFile">Firmware File</label>
+            <input id="firmwareFile" ref="firmwareInput" class="file-input" type="file" accept=".bin" @change="handleFirmwareSelect">
+            <div class="hint">Use the same Wi-Fi network and keep this page open until the board reboots.</div>
+          </div>
+        </div>
+        <div class="actions" style="justify-content:flex-start;">
+          <button class="btn" :disabled="ota.busy || !ota.file" @click="uploadFirmware">
+            {{ ota.busy ? 'Uploading...' : 'Upload Firmware' }}
+          </button>
+          <button class="btn secondary" :disabled="ota.busy" @click="clearFirmware">Clear</button>
+        </div>
+        <p class="status" v-if="ota.status">{{ ota.status }}</p>
+      </article>
     </section>
   </div>
 
@@ -281,7 +320,12 @@
           loading: true,
           saving: false,
           clockBusy: false,
-          message: ''
+          message: '',
+          ota: {
+            file: null,
+            status: '',
+            busy: false
+          }
         };
       },
       computed: {
@@ -394,6 +438,46 @@
             this.message = `Clock update failed: ${err.message}`;
           } finally {
             this.clockBusy = false;
+          }
+        },
+        handleFirmwareSelect(event) {
+          const [file] = event.target.files;
+          this.ota.file = file || null;
+          if (file) {
+            const sizeKb = (file.size / 1024).toFixed(1);
+            this.ota.status = `Selected ${file.name} (${sizeKb} KB)`;
+          } else {
+            this.ota.status = '';
+          }
+        },
+        clearFirmware() {
+          this.ota.file = null;
+          this.ota.status = '';
+          if (this.$refs.firmwareInput) {
+            this.$refs.firmwareInput.value = '';
+          }
+        },
+        async uploadFirmware() {
+          if (!this.ota.file) {
+            this.ota.status = 'Choose a .bin file first.';
+            return;
+          }
+          this.ota.busy = true;
+          this.ota.status = 'Uploading... device will reboot when done.';
+          try {
+            const form = new FormData();
+            form.append('update', this.ota.file);
+            const res = await fetch('/update', {
+              method: 'POST',
+              body: form
+            });
+            const text = await res.text();
+            if (!res.ok) throw new Error(text || res.statusText);
+            this.ota.status = 'Upload finished. Device will reboot now. Wait ~30s, then reload this page.';
+          } catch (err) {
+            this.ota.status = `Upload failed: ${err.message}`;
+          } finally {
+            this.ota.busy = false;
           }
         }
       },

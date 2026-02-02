@@ -6,6 +6,7 @@
 WiFiHelper wiFiHelper;
 ESP8266WebServer server(80);
 ESP8266HTTPUpdateServer httpUpdater;
+const char* OTA_UPDATE_PATH = "/update";
 ServerHelper serverHelper("WateringSystemCtrlV1", &server);
 Logger logger;
 
@@ -355,7 +356,7 @@ void setupHTTPActions() {
 	server.onNotFound(handleNotFound);
 
 	// Setup HTTP Updater
-	httpUpdater.setup(&server);
+	httpUpdater.setup(&server, OTA_UPDATE_PATH);
 
 	server.begin();
 }
