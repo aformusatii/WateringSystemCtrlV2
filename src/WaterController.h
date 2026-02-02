@@ -89,7 +89,7 @@ private:
     void setPinHigh(uint8_t);
     void setPinLow(uint8_t);
     void enableCommonGround();
-    void tickCommonGround(unsigned long now);
+    void tickCommonGround();
 
     // -- File system magic
     bool saveToFile(const char*, const uint8_t);

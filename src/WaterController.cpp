@@ -161,7 +161,7 @@ void WaterController::updateTimer(unsigned long current_time)
     	applyChannelsToHardware();
     }
 
-    tickCommonGround(current_time);
+    tickCommonGround();
 }
 
 void WaterController::applyChannelsToHardware()
@@ -215,12 +215,19 @@ void WaterController::setPinLow(uint8_t pin) {
 void WaterController::enableCommonGround() {
 	setPinHigh(CHANNEL_GPIO_COMMON_GROUND_PIN);
 	_commonGroundActive = true;
-	_commonGroundActivatedAt = millis();
+	_commonGroundActivatedAt = millis() - 500;
 }
 
-void WaterController::tickCommonGround(unsigned long now) {
-	if (_commonGroundActive && ((now - _commonGroundActivatedAt) >= COMMON_GROUND_TIMEOUT_MS)) {
-		//setPinLow(CHANNEL_GPIO_COMMON_GROUND_PIN);
+void WaterController::tickCommonGround() {
+	if (_commonGroundActive) {
+		unsigned long now = millis();
+
+		// disable common ground after timeout
+		if ((unsigned long)(now - _commonGroundActivatedAt) < COMMON_GROUND_TIMEOUT_MS) {
+			return;
+		}
+
+		setPinLow(CHANNEL_GPIO_COMMON_GROUND_PIN);
 		_commonGroundActive = false;
 		_pcf->write16(pcfValues);
 	}
