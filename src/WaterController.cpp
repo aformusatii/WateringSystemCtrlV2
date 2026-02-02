@@ -72,6 +72,54 @@ void WaterController::initializeChannels() {
     channels[channel_index].gpio = CHANNEL_GPIO_MOSFET_LOW;
     channels[channel_index].pin = 2;
 
+	// === Channel 8 ===
+	channel_index++;
+	channels[channel_index].index = channel_index;
+    channels[channel_index].name = "CH8";
+    channels[channel_index].mode = CHANNEL_MODE_MANUAL_OFF;
+    channels[channel_index].gpio = CHANNEL_GPIO_MOSFET_LOW;
+    channels[channel_index].pin = 3;
+
+	// === Channel 9 ===
+	channel_index++;
+	channels[channel_index].index = channel_index;
+    channels[channel_index].name = "CH9";
+    channels[channel_index].mode = CHANNEL_MODE_MANUAL_OFF;
+    channels[channel_index].gpio = CHANNEL_GPIO_MOSFET_LOW;
+    channels[channel_index].pin = 4;
+
+	// === Channel 10 ===
+	channel_index++;
+	channels[channel_index].index = channel_index;
+    channels[channel_index].name = "CH10";
+    channels[channel_index].mode = CHANNEL_MODE_MANUAL_OFF;
+    channels[channel_index].gpio = CHANNEL_GPIO_MOSFET_LOW;
+    channels[channel_index].pin = 5;
+
+	// === Channel 11 ===
+	channel_index++;
+	channels[channel_index].index = channel_index;
+    channels[channel_index].name = "CH11";
+    channels[channel_index].mode = CHANNEL_MODE_MANUAL_OFF;
+    channels[channel_index].gpio = CHANNEL_GPIO_MOSFET_LOW;
+    channels[channel_index].pin = 6;
+
+	// === Channel 12 ===
+	channel_index++;
+	channels[channel_index].index = channel_index;
+    channels[channel_index].name = "CH12";
+    channels[channel_index].mode = CHANNEL_MODE_MANUAL_OFF;
+    channels[channel_index].gpio = CHANNEL_GPIO_MOSFET_LOW;
+    channels[channel_index].pin = 7;
+
+	// === Channel 13 ===
+	channel_index++;
+	channels[channel_index].index = channel_index;
+    channels[channel_index].name = "CH13";
+    channels[channel_index].mode = CHANNEL_MODE_MANUAL_OFF;
+    channels[channel_index].gpio = CHANNEL_GPIO_MOSFET_LOW;
+    channels[channel_index].pin = 8;
+
     for (uint8_t ch = 0; ch < MAX_CHANNELS; ++ch) {
     	channels[ch].open = false;
     	channels[ch].timer.offDurationMs = 5000;

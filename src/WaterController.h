@@ -16,7 +16,7 @@ struct RTCTimeStruct {
 #define COMMON_GROUND_TIMEOUT_MS                10000
 #define CHANNEL_GPIO_SAFETY_VALVE_PIN           15
 
-#define MAX_CHANNELS                            7
+#define MAX_CHANNELS                            13
 #define MAX_TIME_SLOTS                          4
 
 #define CONFIG_FILE_SLOTS                       1
