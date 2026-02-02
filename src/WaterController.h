@@ -12,24 +12,25 @@ struct RTCTimeStruct {
     uint8_t second;
 };
 
-#define CHANNEL_GPIO_RELAY_ON_PIN     2
-#define CHANNEL_GPIO_MAIN_WATER_PIN   15
+#define CHANNEL_GPIO_COMMON_GROUND_PIN          0
+#define COMMON_GROUND_TIMEOUT_MS                10000
+#define CHANNEL_GPIO_SAFETY_VALVE_PIN           15
 
-#define MAX_CHANNELS                  6
-#define MAX_TIME_SLOTS                4
+#define MAX_CHANNELS                            7
+#define MAX_TIME_SLOTS                          4
 
-#define CONFIG_FILE_SLOTS             1
-#define CONFIG_FILE_CHANNELS          2
+#define CONFIG_FILE_SLOTS                       1
+#define CONFIG_FILE_CHANNELS                    2
 
-#define CONFIG_FILE_CHANNELS_PATH     "/channels.json"
+#define CONFIG_FILE_CHANNELS_PATH               "/channels.json"
 
-#define CHANNEL_MODE_SCHEDULE         1
-#define CHANNEL_MODE_TIMER            2
-#define CHANNEL_MODE_MANUAL_ON        3
-#define CHANNEL_MODE_MANUAL_OFF       4
+#define CHANNEL_MODE_SCHEDULE                   1
+#define CHANNEL_MODE_TIMER                      2
+#define CHANNEL_MODE_MANUAL_ON                  3
+#define CHANNEL_MODE_MANUAL_OFF                 4
 
-#define CHANNEL_GPIO_RELAY            1
-#define CHANNEL_GPIO_MOSFET_LOW       2
+#define CHANNEL_GPIO_RELAY                      1
+#define CHANNEL_GPIO_MOSFET_LOW                 2
 
 class WaterController {
 public:
@@ -78,11 +79,17 @@ private:
     PCF8575* _pcf;
     uint16_t pcfValues;
     uint8_t _channelPinBase;
+    bool _commonGroundActive;
+    unsigned long _commonGroundActivatedAt;
 
     Channel channels[MAX_CHANNELS];
 
     void initializeChannels();
     bool isTimeInRange(uint8_t curH, uint8_t curM, uint8_t startH, uint8_t startM, uint16_t duration);
+    void setPinHigh(uint8_t);
+    void setPinLow(uint8_t);
+    void enableCommonGround();
+    void tickCommonGround(unsigned long now);
 
     // -- File system magic
     bool saveToFile(const char*, const uint8_t);

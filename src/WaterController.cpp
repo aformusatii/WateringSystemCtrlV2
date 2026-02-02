@@ -1,7 +1,8 @@
 #include "WaterController.h"
 
 WaterController::WaterController(PCF8575* pcf, uint8_t channelPinBase)
-    : _pcf(pcf), pcfValues(0), _channelPinBase(channelPinBase)
+    : _pcf(pcf), pcfValues(0), _channelPinBase(channelPinBase),
+      _commonGroundActive(false), _commonGroundActivatedAt(0)
 {
 }
 
@@ -53,13 +54,23 @@ void WaterController::initializeChannels() {
     channels[channel_index].gpio = CHANNEL_GPIO_RELAY;
     channels[channel_index].pin = 10;
 
+	// ==========================================
+
 	// === Channel 6 ===
 	channel_index++;
 	channels[channel_index].index = channel_index;
     channels[channel_index].name = "CH6";
     channels[channel_index].mode = CHANNEL_MODE_MANUAL_OFF;
-    channels[channel_index].gpio = CHANNEL_GPIO_RELAY;
-    channels[channel_index].pin = 0;
+    channels[channel_index].gpio = CHANNEL_GPIO_MOSFET_LOW;
+    channels[channel_index].pin = 1;
+
+	// === Channel 7 ===
+	channel_index++;
+	channels[channel_index].index = channel_index;
+    channels[channel_index].name = "CH7";
+    channels[channel_index].mode = CHANNEL_MODE_MANUAL_OFF;
+    channels[channel_index].gpio = CHANNEL_GPIO_MOSFET_LOW;
+    channels[channel_index].pin = 2;
 
     for (uint8_t ch = 0; ch < MAX_CHANNELS; ++ch) {
     	channels[ch].open = false;
@@ -149,6 +160,8 @@ void WaterController::updateTimer(unsigned long current_time)
     if (changed) {
     	applyChannelsToHardware();
     }
+
+    tickCommonGround(current_time);
 }
 
 void WaterController::applyChannelsToHardware()
@@ -158,37 +171,59 @@ void WaterController::applyChannelsToHardware()
     	switch (channels[ch].gpio) {
     		case CHANNEL_GPIO_RELAY:
     	        if (channels[ch].open) {
-    	        	pcfValues &= ~(1 << (channels[ch].pin));
+					setPinLow(channels[ch].pin);
     	        	haveChannelsOpen = true;
     	        } else {
-    	        	pcfValues |= (1 << (channels[ch].pin));
+					setPinHigh(channels[ch].pin);
     	        }
 
     			break;
 
     		case CHANNEL_GPIO_MOSFET_LOW:
     	        if (channels[ch].open) {
-    	        	pcfValues |= (1 << (channels[ch].pin));
+					setPinHigh(channels[ch].pin);
     	        	haveChannelsOpen = true;
     	        } else {
-    	        	pcfValues &= ~(1 << (channels[ch].pin));
+    	        	setPinLow(channels[ch].pin);
     	        }
 
     			break;
     	}
     }
 
-    // The relay board is actually enabled by dedicated pin
-    pcfValues |= (1 << CHANNEL_GPIO_RELAY_ON_PIN);
-
 	// enable or disable the safety valve
     if (haveChannelsOpen) {
-    	pcfValues &= ~(1 << CHANNEL_GPIO_MAIN_WATER_PIN);
+		setPinLow(CHANNEL_GPIO_SAFETY_VALVE_PIN);
     } else {
-    	pcfValues |= (1 << CHANNEL_GPIO_MAIN_WATER_PIN);
+		setPinHigh(CHANNEL_GPIO_SAFETY_VALVE_PIN);
     }
 
+    // The relay board is actually enabled by dedicated pin; keep it high only temporarily
+	enableCommonGround();
+
     _pcf->write16(pcfValues);
+}
+
+void WaterController::setPinHigh(uint8_t pin) {
+	pcfValues |= (1 << pin);
+}
+
+void WaterController::setPinLow(uint8_t pin) {
+	pcfValues &= ~(1 << pin);
+}
+
+void WaterController::enableCommonGround() {
+	setPinHigh(CHANNEL_GPIO_COMMON_GROUND_PIN);
+	_commonGroundActive = true;
+	_commonGroundActivatedAt = millis();
+}
+
+void WaterController::tickCommonGround(unsigned long now) {
+	if (_commonGroundActive && ((now - _commonGroundActivatedAt) >= COMMON_GROUND_TIMEOUT_MS)) {
+		//setPinLow(CHANNEL_GPIO_COMMON_GROUND_PIN);
+		_commonGroundActive = false;
+		_pcf->write16(pcfValues);
+	}
 }
 
 // ==== CHANNELS LOAD/SAVE ====

@@ -55,6 +55,7 @@ void fillHardwareInfo(JsonDocument &doc) {
 	doc["freeHeap"] = ESP.getFreeHeap();
 	doc["sdkVersion"] = ESP.getSdkVersion();
 	doc["resetReason"] = ESP.getResetReason();
+	doc["uptimeMillis"] = millis();
 
 	FSInfo fsInfo;
 	if (LittleFS.info(fsInfo)) {
@@ -162,6 +163,47 @@ void getPortState() {
     }
 
 	writeJson(200, rootDoc);
+}
+
+void getPinState() {
+	if (!server.hasArg("i")) {
+		server.send(400, "application/json", "{\"error\":\"missing pin 'i'\"}");
+		return;
+	}
+
+	int pin = server.arg("i").toInt();
+	if (pin < PIN_MIN || pin > PIN_MAX) {
+		server.send(400, "application/json", "{\"error\":\"pin out of range (0-15)\"}");
+		return;
+	}
+
+	JsonDocument doc;
+	doc["pin"] = pin;
+	doc["state"] = (bool) PCF.read(pin);
+	writeJson(200, doc);
+}
+
+void setPinState() {
+	JsonDocument request;
+	auto err = deserializeJson(request, server.arg("plain"));
+	if (err) {
+		server.send(400, "application/json", "{\"error\":\"invalid json\"}");
+		return;
+	}
+	int pin = request["pin"] | -1;
+	bool hasState = request["state"].is<bool>();
+	if (pin < PIN_MIN || pin > PIN_MAX || !hasState) {
+		server.send(400, "application/json", "{\"error\":\"need {pin:0-15, state:true|false}\"}");
+		return;
+	}
+
+	bool state = request["state"];
+	PCF.write(pin, state ? HIGH : LOW);
+
+	JsonDocument response;
+	response["pin"] = pin;
+	response["state"] = state;
+	writeJson(200, response);
 }
 
 void getTime() {
@@ -395,6 +437,9 @@ void setupHTTPActions() {
 
 	server.on("/DS3231.json", HTTP_GET, getTime);
 	server.on("/DS3231.json", HTTP_POST, setTime);
+
+	server.on("/pin", HTTP_GET, getPinState);
+	server.on("/pin", HTTP_POST, setPinState);
 
 	server.on("/files", HTTP_GET, handleFilesRead);
 	server.on("/delete", HTTP_GET, handleFileDelete);

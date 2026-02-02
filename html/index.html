@@ -287,6 +287,27 @@
         </div>
       </article>
 
+      <article class="card">
+        <h2>Direct PCF8575 Control</h2>
+        <p class="ds-meta">Set a pin (0-15) HIGH or LOW instantly.</p>
+        <div class="row">
+          <div>
+            <label for="pinNumber">Pin Number</label>
+            <input id="pinNumber" class="input" type="number" min="0" max="15" v-model.number="pinCtrl.pin">
+          </div>
+          <div>
+            <label>Current State</label>
+            <div class="end-time">{{ pinCtrl.state === null ? '—' : (pinCtrl.state ? 'HIGH' : 'LOW') }}</div>
+          </div>
+        </div>
+        <div class="actions" style="justify-content:flex-start;">
+          <button class="btn" :disabled="pinCtrl.busy" @click="setPin(true)">Set HIGH</button>
+          <button class="btn secondary" :disabled="pinCtrl.busy" @click="setPin(false)">Set LOW</button>
+          <button class="btn secondary" :disabled="pinCtrl.busy" @click="readPin">Read</button>
+        </div>
+        <p class="status" v-if="pinCtrl.message">{{ pinCtrl.message }}</p>
+      </article>
+
       <article class="card ds-card">
         <h2>DS3231</h2>
         <p class="ds-meta" v-if="ds3231">
@@ -374,6 +395,9 @@
           <div class="hw-item" v-if="hardware.network">
             <p class="hw-key">RSSI</p><p class="hw-val">{{ hardware.network.rssi }} dBm</p>
           </div>
+          <div class="hw-item" v-if="hardware.uptimeMillis !== undefined">
+            <p class="hw-key">Uptime (ms)</p><p class="hw-val">{{ hardware.uptimeMillis }}</p>
+          </div>
         </div>
       </article>
     </section>
@@ -406,7 +430,13 @@
             busy: false
           },
           hardware: null,
-          hardwareLoading: false
+          hardwareLoading: false,
+          pinCtrl: {
+            pin: 0,
+            state: null,
+            busy: false,
+            message: ''
+          }
         };
       },
       computed: {
@@ -581,6 +611,50 @@
         hex(val) {
           if (val === undefined || val === null) return '—';
           return '0x' + Number(val).toString(16).toUpperCase().padStart(6, '0');
+        },
+        async readPin() {
+          const pin = this.pinCtrl.pin;
+          if (pin < 0 || pin > 15) {
+            this.pinCtrl.message = 'Pin must be 0-15';
+            return;
+          }
+          this.pinCtrl.busy = true;
+          this.pinCtrl.message = '';
+          try {
+            const res = await fetch(`/pin?i=${pin}`);
+            if (!res.ok) throw new Error(res.statusText);
+            const data = await res.json();
+            this.pinCtrl.state = !!data.state;
+            this.pinCtrl.message = `Pin ${pin} is ${data.state ? 'HIGH' : 'LOW'}`;
+          } catch (err) {
+            this.pinCtrl.message = `Read failed: ${err.message}`;
+          } finally {
+            this.pinCtrl.busy = false;
+          }
+        },
+        async setPin(state) {
+          const pin = this.pinCtrl.pin;
+          if (pin < 0 || pin > 15) {
+            this.pinCtrl.message = 'Pin must be 0-15';
+            return;
+          }
+          this.pinCtrl.busy = true;
+          this.pinCtrl.message = '';
+          try {
+            const res = await fetch('/pin', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ pin, state })
+            });
+            if (!res.ok) throw new Error(res.statusText);
+            const data = await res.json();
+            this.pinCtrl.state = !!data.state;
+            this.pinCtrl.message = `Pin ${pin} set ${data.state ? 'HIGH' : 'LOW'}`;
+          } catch (err) {
+            this.pinCtrl.message = `Write failed: ${err.message}`;
+          } finally {
+            this.pinCtrl.busy = false;
+          }
         }
       },
       mounted() {

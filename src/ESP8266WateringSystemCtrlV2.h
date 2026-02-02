@@ -43,6 +43,8 @@ void getTimeSlots();
 void setTimeSlots();
 void getTime();
 void setTime();
+void getPinState();
+void setPinState();
 
 void handleFilesRead();
 bool handleFileRead(String);
