@@ -7,7 +7,6 @@ WiFiHelper wiFiHelper;
 ESP8266WebServer server(80);
 ESP8266HTTPUpdateServer httpUpdater;
 const char* OTA_UPDATE_PATH = "/update";
-ServerHelper serverHelper("WateringSystemCtrlV1", &server);
 Logger logger;
 
 #define GPIO_WATER_METER      D5
@@ -109,6 +108,7 @@ void setup()
 	}
 
 	wiFiHelper.begin(LOCAL_SSID, LOCAL_KEY, setupAfterWiFiConnected);
+	wiFiHelper.setupLedStatus(LED_BUILTIN);
 
 	Serial.println("Started WateringSystemCtrlV1!");
 }
@@ -129,7 +129,8 @@ void vueJs() {
 void handleNotFound() {
 	String path = server.uri();
 	if (!handleFileRead(path)) {
-		serverHelper.handleNotFound();
+	  String message = "File Not Found";
+	  server.send(404, "text/plain", message);
 	}
 }
 

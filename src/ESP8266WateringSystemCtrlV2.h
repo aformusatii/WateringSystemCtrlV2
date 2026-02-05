@@ -9,7 +9,6 @@
 #include "Arduino.h"
 //add your includes for the project ESP8266WateringSystemCtrlV1 here
 #include "WiFiHelper.h"
-#include "ServerHelper.h"
 #include "Logger.h"
 
 #include <secrets.h>
