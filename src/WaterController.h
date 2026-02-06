@@ -35,10 +35,11 @@ struct RTCTimeStruct {
 class WaterController {
 public:
     struct Schedule {
-    	uint8_t index;
+	uint8_t index;
         uint8_t startHour;
         uint8_t startMinute;
         uint16_t durationMin;
+        bool enabled;
     };
 
     struct Timer {

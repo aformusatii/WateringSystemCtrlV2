@@ -261,6 +261,10 @@
           <div class="grid" style="gap:12px">
             <div class="inline" v-for="(slot, slotIndex) in channel.schedules" :key="slotIndex">
               <div style="font-weight:700; min-width:58px;">Slot {{ slotIndex + 1 }}</div>
+              <div class="inline" style="align-items:center; gap:6px;">
+                <input type="checkbox" :checked="!!slot.enabled" @change="slot.enabled = $event.target.checked">
+                <label style="margin:0; font-weight:600;">Enabled</label>
+              </div>
               <div>
                 <label>Start</label>
                 <input class="input" style="min-width:120px" type="time" :value="timeString(slot)" @input="updateStart(slot, $event.target.value)">
@@ -475,10 +479,31 @@
         setMode(channel, mode) {
           channel.mode = mode;
         },
+        normalizeChannel(channel) {
+          channel.schedules = (channel.schedules || []).map((slot, idx) => ({
+            ...slot,
+            enabled: !!slot.enabled,
+            startHour: this.toNumber(slot.startHour),
+            startMinute: this.toNumber(slot.startMinute),
+            durationMin: this.toNumber(slot.durationMin),
+            index: slot.index !== undefined ? slot.index : idx,
+          }));
+          while (channel.schedules.length < 4) {
+            channel.schedules.push({
+              index: channel.schedules.length,
+              startHour: 0,
+              startMinute: 0,
+              durationMin: 0,
+              enabled: false,
+            });
+          }
+          return channel;
+        },
         async loadChannels() {
           const res = await fetch('channels.json');
           if (!res.ok) throw new Error(res.statusText);
-          this.channels = await res.json();
+          const data = await res.json();
+          this.channels = data.map((ch) => this.normalizeChannel(ch));
         },
         async loadClock() {
           const res = await fetch('DS3231.json');

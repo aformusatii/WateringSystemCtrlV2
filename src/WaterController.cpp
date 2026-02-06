@@ -131,6 +131,7 @@ void WaterController::initializeChannels() {
     		channels[ch].schedules[timeSlotIndex].startHour = 5;
     		channels[ch].schedules[timeSlotIndex].startMinute = 30;
     		channels[ch].schedules[timeSlotIndex].durationMin = 30;
+    		channels[ch].schedules[timeSlotIndex].enabled = false;
     	}
     }
 }
@@ -162,7 +163,8 @@ void WaterController::updateSchedule(const RTCTimeStruct& now)
 			for (uint8_t timeSlotIndex = 0; timeSlotIndex < MAX_TIME_SLOTS; ++timeSlotIndex) {
 				Schedule schedule = channels[ch].schedules[timeSlotIndex];
 
-				if (isTimeInRange(now.hour, now.minute, schedule.startHour, schedule.startMinute, schedule.durationMin)) {
+				if (schedule.enabled
+						&& isTimeInRange(now.hour, now.minute, schedule.startHour, schedule.startMinute, schedule.durationMin)) {
 					timeMatch = true;
 				}
 			}
@@ -327,6 +329,11 @@ void WaterController::channelsReadFromJson(const JsonArray& arr)
             		channels[ch].schedules[timeSlotIndex].startHour = schedule["startHour"];
             		channels[ch].schedules[timeSlotIndex].startMinute = schedule["startMinute"];
             		channels[ch].schedules[timeSlotIndex].durationMin = schedule["durationMin"];
+            		if (schedule["enabled"].is<bool>()) {
+            			channels[ch].schedules[timeSlotIndex].enabled = schedule["enabled"];
+            		} else {
+            			channels[ch].schedules[timeSlotIndex].enabled = false;
+            		}
         		}
         		timeSlotIndex++;
         	}
@@ -366,6 +373,7 @@ void WaterController::channelsWriteToJson(JsonArray& arr) const
 			scheduleJson["startHour"] = schedule.startHour;
 			scheduleJson["startMinute"] = schedule.startMinute;
 			scheduleJson["durationMin"] = schedule.durationMin;
+			scheduleJson["enabled"] = schedule.enabled;
 		}
 
 		yield(); // building JSON response; prevent WiFi starvation
