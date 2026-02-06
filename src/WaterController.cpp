@@ -175,6 +175,8 @@ void WaterController::updateSchedule(const RTCTimeStruct& now)
 				channels[ch].open = false;
 			}
     	}
+
+    	yield(); // let WiFi stack run while iterating channels
     }
 
     if (changed) {
@@ -203,6 +205,8 @@ void WaterController::updateTimer(unsigned long current_time)
 				}
 			}
     	}
+
+    	yield(); // allow background tasks during timer evaluation
     }
 
     if (changed) {
@@ -337,6 +341,8 @@ void WaterController::channelsReadFromJson(const JsonArray& arr)
         }
 
         ch++;
+
+        yield(); // parsing incoming JSON might be large; keep WiFi responsive
     }
 }
 
@@ -361,6 +367,8 @@ void WaterController::channelsWriteToJson(JsonArray& arr) const
 			scheduleJson["startMinute"] = schedule.startMinute;
 			scheduleJson["durationMin"] = schedule.durationMin;
 		}
+
+		yield(); // building JSON response; prevent WiFi starvation
     }
 }
 

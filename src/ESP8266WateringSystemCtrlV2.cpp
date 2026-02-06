@@ -290,6 +290,7 @@ void handleFileUpload() {
 		// Write the bytes to the file
 		if (fsUploadFile) {
 			fsUploadFile.write(upload.buf, upload.currentSize);
+			yield(); // allow WiFi stack while streaming upload chunks
 		}
 
 	} else if (upload.status == UPLOAD_FILE_END) {
@@ -356,6 +357,7 @@ void handleFilesRead() {
 		JsonObject file = files.add<JsonObject>();
 		file["name"] = dir.fileName();
 		file["size"] = dir.fileSize();
+		yield(); // avoid starving WiFi while enumerating files
 	}
 
 	writeJson(200, doc);
@@ -479,6 +481,7 @@ void loop()
 
 	if (wiFiHelper.wiFiOk) {
 		server.handleClient();
+		yield(); // keep background networking responsive
 	}
 
     // Check if interval has passed
