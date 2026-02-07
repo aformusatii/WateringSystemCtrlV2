@@ -46,3 +46,9 @@ ESP8266 (Wemos D1 mini) irrigation controller that drives six relay channels thr
 - `GET /DS3231.json` – RTC time/temperature; `POST /DS3231.json` – set time.
 - `GET /files` – list LittleFS files; `GET /file/<name>` – download; `GET /delete?filename=<name>` – remove; `POST /upload` – upload.
 - OTA: visit `/update` (served by `ESP8266HTTPUpdateServer`).
+
+## Future Work
+- [ ] Add Soft Access Point (SoftAP / AP) mode when can't join to WiFi network.
+- [ ] Water flow sensor logic. Detection of failure scenarios, ex: valve failure, no water.
+- [ ] Persisten logger to internal flash storage.
+- [ ] E2E Integration Test.
